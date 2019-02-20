@@ -156,4 +156,5 @@ It used to be the case that Linux could only be ported to architectures that had
 # Chapter 7: Debugging Ncurses Programs
 # Chapter 8: Other Stuff
 
+---
 ##### Original Source: http://web.archive.org/web/20080511001311/http://www.dirac.org/linux/gdb/
