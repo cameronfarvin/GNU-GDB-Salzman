@@ -1,5 +1,5 @@
 # Using GNU's GDB Debugger
-###### By Peter Jay Salzman
+###### By Peter Jay Salzman (re-written from WebArchive by Cameron Farvin @assemblyDruid)
 
 # Chapter 0: Administrata
 ## Why Write This Tutorial?
