@@ -142,7 +142,8 @@ It used to be the case that Linux could only be ported to architectures that had
 * Optional: If you want to know more about VM, here's a [link](https://en.wikipedia.org/wiki/Virtual_memory). This is much more than you need to know.
 
 ## Memory Layout
-That's how VM works. For the most part, each process's VM space is laid out in a similar and predictable manner:
+That's how VM works. For the most part, each process's VM space is laid out in a similar and predictable manner.
+
 | Memory         | Program Stack                    | Notes                                     |
 |:---------------|:--------------------------------:|:------------------------------------------|
 | High Addresses | Args & Environment Vars          | Command line arguments & Environment Vars |
@@ -365,8 +366,177 @@ One last comment. It's certainly possible to perform compiler optimizations on a
 * Read [this](https://en.wikipedia.org/wiki/Symbol_table) link about symbol tables (it's short).
 * Optional: Read [this](https://en.wikipedia.org/wiki/COFF) link about the COFF object file format.
 
-
 ## Investigating The Stack With GDB
+We'll look at the stack again, this time, using GDB. You may not understand all of this since you don't know about breakpoints yet, but it should be intuitive. Compile and run try1.c:
+```c
+   1    #include<stdio.h>
+   2    static void display(int i, int *ptr);
+   3
+   4    int main(void) {
+   5       int x = 5;
+   6       int *xptr = &x;
+   7       printf("In main():\n");
+   8       printf("   x is %d and is stored at %p.\n", x, &x);
+   9       printf("   xptr points to %p which holds %d.\n", xptr, *xptr);
+   10      display(x, xptr);
+   11      return 0;
+   12   }
+   13
+   14    void display(int z, int *zptr) {
+   15    	printf("In display():\n");
+   16       printf("   z is %d and is stored at %p.\n", z, &z);
+   17       printf("   zptr points to %p which holds %d.\n", zptr, *zptr);
+   18   }
+```
+Make sure you understand the output before continuing with this tutorial. Here's what I see:
+```
+   $ ./try1
+   In main():
+      x is 5 and is stored at 0xbffff948.
+      xptr points to 0xbffff948 which holds 5.
+   In display():
+      z is 5 and is stored at 0xbffff924.
+      zptr points to 0xbffff948 which holds 5.
+```
+You debug an executable by invoking GDB with the name of the executable. Start a debugging session with try1. You'll see a rather verbose copyright notice:
+```
+   $ gdb try1
+   GNU gdb 6.1-debian
+   Copyright 2004 Free Software Foundation, Inc.
+   GDB is free software, covered by the GNU General Public License, and you are
+   welcome to change it and/or distribute copies of it under certain conditions.
+   Type "show copying" to see the conditions.
+   There is absolutely no warranty for GDB.  Type "show warranty" for details.
+
+   (gdb)
+```
+The (gdb) is GDB's prompt. It's now waiting for us to input commands. The program is currently not running; to run it, type run. This runs the program from inside GDB:
+```
+   (gdb) run
+   Starting program: try1
+   In main():
+      x is 5 and is stored at 0xbffffb34.
+      xptr points to 0xbffffb34 which holds 5.
+   In display():
+      z is 5 and is stored at 0xbffffb10.
+      zptr points to 0xbffffb34 which holds 5.
+
+   Program exited normally.
+   (gdb)
+```
+Well, the program ran. It was a good start, but frankly, a little lackluster. We could've done the same thing by running the program ourself. But one thing we can't do on our own is to pause the program in the middle of execution and take a look at the stack. We'll do this next.
+
+You get GDB to pause execution by using breakpoints. We'll cover breakpoints later, but for now, all you need to know is that when you tell GDB break 5, the program will pause at line 5. You may ask: does the program execute line 5 (pause between 5 and 6) or does the program not execute line 5 (pause between 4 and 5)? The answer is that line 5 is not executed. Remember these principles:
+```
+    break 5 means to pause at line 5.
+    This means GDB pauses between lines 4 and 5. Line 4 has executed. Line 5 has not.
+```
+Set a breakpoint at line 10 and rerun the program:
+```
+   (gdb) break 10
+   Breakpoint 1 at 0x8048445: file try1.c, line 10.
+   (gdb) run
+   Starting program: try1
+   In main():
+      x is 5 and is stored at 0xbffffb34.
+      xptr holds 0xbffffb34 and points to 5.
+
+   Breakpoint 1, main () at try1.c:10
+   10         display(x, xptr);
+```
+We set a breakpoint at line 10 of file try1.c. GDB told us this line of code corresponds to memory address 0x8048445. We reran the program and got the first 2 lines of output. We're in main(), sitting before line 10. We can look at the stack by using GDB's backtrace command:
+```
+   (gdb) backtrace
+   #0  main () at try1.c:10
+   (gdb)
+```
+There's one frame on the stack, numbered 0, and it belongs to main(). If we execute the next line of code, we'll be in display(). From the previous section, you should know exactly what should happen to the stack: another frame will be added to the bottom of the stack. Let's see this in action. You can execute the next line of code using GDB's step command:
+```
+   (gdb) step
+   display (z=5, zptr=0xbffffb34) at try1.c:15
+   15              printf("In display():\n");
+   (gdb)
+```
+Look at the stack again, and make sure you understand everything you see:
+```
+   (gdb) backtrace
+   #0  display (z=5, zptr=0xbffffb34) at try1.c:15
+   #1  0x08048455 in main () at try1.c:10
+```
+Some points to note:
+
+* We now have two stack frames, frame 1 belonging to main() and frame 0 belong to display().
+* Each frame listing gives the arguments to that function. We see that main() took no arguments, but display() did (and we're shown the value of the arguments).
+* Each frame listing gives the line number that's currently being executed within that frame. Look back at the source code and verify you understand the line numbers shown in the backtrace.
+* Personally, I find the numbering system for the frame to be confusing. I'd prefer for main() to remain frame 0, and for additional frames to get higher numbers. But this is consistent with the idea that the stack grows "downward". Just remember that the lowest numbered frame is the one belonging to the most recently called function.
+
+Execute the next two lines of code:
+```
+   (gdb) step
+   In display():
+   16         printf("   z is %d and is stored at %p.\n", z, &z);
+   (gdb) step
+      z is 5 and is stored at 0xbffffb10.
+   17         printf("   zptr holds %p and points to %d.\n", zptr, *zptr);
+```
+Recall that the frame is where automatic variables for the function are stored. Unless you tell it otherwise, GDB is always in the context of the frame corresponding to the currently executing function. Since execution is currently in display(), GDB is in the context of frame 0. We can ask GDB to tell us which frame its context is in by giving the frame command without arguments:
+```
+   (gdb) frame
+   #0  display (z=5, zptr=0xbffffb34) at try1.c:17
+   17         printf("   zptr holds %p and points to %d.\n", zptr, *zptr);
+```
+I didn't tell you what the word "context" means; now I'll explain. Since GDB's context is in frame 0, we have access to all the local variables in frame 0. Conversely, we don't have access to automatic variables in any other frame. Let's investigate this. GDB's print command can be used to give us the value of any variable within the current frame. Since z and zptr are variables in display(), and GDB is currently in the frame for display(), we should be able to print their values:
+```
+   (gdb) print z
+   $1 = 5
+   (gdb) print zptr
+   $2 = (int *) 0xbffffb34
+```
+But we do not have access to automatic variables stored in other frames. Try to look at the variables in main(), which is frame 1:
+```
+   (gdb) print x
+   No symbol "x" in current context.
+   (gdb) print xptr
+   No symbol "xptr" in current context.
+```
+Now for magic. We can tell GDB to switch from frame 0 to frame 1 using the frame command with the frame number as an argument. This gives us access to the variables in frame 1. As you can guess, after switching frames, we won't have access to variables stored in frame 0. Follow along:
+```
+   (gdb) frame 1                           <--- switch to frame 1
+   #1  0x08048455 in main () at try1.c:10
+   10         display(x, xptr);
+   (gdb) print x
+   $5 = 5                                  <--- we have access to variables in frame 1
+   (gdb) print xptr
+   $6 = (int *) 0xbffffb34                 <--- we have access to variables in frame 1
+   (gdb) print z
+   No symbol "z" in current context.       <--- we don't have access to variables in frame 0
+   (gdb) print zptr
+   No symbol "zptr" in current context.    <--- we don't have access to variables in frame 0
+```
+By the way, one of the hardest things to get used to with GDB is seeing the program's output:
+```
+   x is 5 and is stored at 0xbffffb34.
+   xptr holds 0xbffffb34 and points to 5.
+```
+intermixed with GDB's output:
+```
+   Starting program: try1
+   In main():
+   ...
+      Breakpoint 1, main () at try1.c:10
+   10         display(x, xptr);
+```
+intermixed with your input to GDB:
+```
+   (gdb) run
+```
+intermixed with your input to the program (which would've been present had we called some kind of input function). This can get confusing, but the more you use GDB, the more you get used to it. Things get tricky when the program does terminal handling (e.g. ncurses or svga libraries), but there are always ways around it.
+
+#### Exercises
+* Continuing from the previous example, switch back to display()'s frame. Verify that you have access to automatic variables in display()'s frame, but not main()'s frame.
+* Figure out how to quit GDB on your own. Control-d works, but I want you to guess the command that quits GDB.
+* GDB has a help feature. If you type help foo, GDB will print a description of command foo. Enter GDB (don't give GDB any arguments) and read the help blurb for all GDB commands we've used in this section.
+* Debug try1 again and set a breakpoint anywhere in display(), then run the program. Figure out how to display the stack along with the values of every local variable for each frame at the same time. Hint: If you did the previous exercise, and read each blurb, this should be easy.
 
 # Interlude: Debugging With Your Brian
 # Chapter 3: Initialization, Listing And Running
