@@ -341,9 +341,31 @@ In addition to debugging formats, GDB understands enhanced variants of these for
 
 Don't let all these formats scare you: in the next section, I'll show you that GDB automagically picks whatever format is best for you. And for the .1% of you that need a different format, you're already knowledgeable enough to make that decision.
 
-
-
 ## Preparing An Executable For Debugging
+If you plan on debugging an executable, a corefile resulting from an executable, or a running process, you must compile the executable with an enhanced symbol table. To generate an enhanced symbol table for an executable, we must compile it with gcc's -g option:
+```
+   gcc -g -o filename filename.c
+```
+As previously discussed, there are many different debugging formats. The actual meaning of -g is to produce debugging information in the native format for your system.
+
+As an alternative to -g, you can also use gcc's -ggdb option:
+```
+   gcc -ggdb -o filename filename.c
+```
+which produces debugging information in the most expressive format available, including the GNU enhanced variants previously discussed. I believe this is probably the option you want to use in most cases.
+
+You can also give a numerical argument to -g, -ggdb and all the other debugging format options, with 1 being the least amount of information and 3 being the most. Without a numerical argument, the debug level defaults to 2. By using -g3 you can even access preprocessor macros, which is really nice. I suggest you always use -ggdb3 to produce an enhanced symbol table.
+
+Debugging information compiled into an executable will not be read into memory unless GDB loads the executable. This means that executables with debug information will not run any slower than executables without debug information (a common misconception). While it's true that debugging executables take up more disk space, the executable will not have a larger "memory footprint" unless it's from within GDB. Similarly, executable load time will be nearly the same, again, unless you run the debug executable from within GDB.
+
+One last comment. It's certainly possible to perform compiler optimizations on an executable which has an augmented symbol table, in other words: gcc -g -O9 try1.c. In fact, GDB is one of the few symbolic debuggers which will generally do quite well debugging optimized executables. However, you should generally turn off optimizations when debugging an executable because there are situations that will confuse GDB. Variables may get optimized out of existence, functions may get inlined, and more things may happen that may or may not confuse gdb. To be on the safe side, turn off optimization when you're debugging a program.
+#### Exercises
+* Run `strip --only-keep-debug try1`. Look at the file size of try1. Now run `strip --strip-debug try1` and look at the file size. Now run `strip --strip-all try1` and look at the file size. Can you guess what's happening? If not, your punishment is to read "man strip", which makes for some provocative reading.
+* You stripped all the unnecessary symbols from try1 in the previous exercise. Re-run the program to make sure it works. Now run `strip --remove-section=.text try1` and look at the file length. Now try to run try1. What do you suppose is going on?
+* Read [this](https://en.wikipedia.org/wiki/Symbol_table) link about symbol tables (it's short).
+* Optional: Read [this](https://en.wikipedia.org/wiki/COFF) link about the COFF object file format.
+
+
 ## Investigating The Stack With GDB
 
 # Interlude: Debugging With Your Brian
