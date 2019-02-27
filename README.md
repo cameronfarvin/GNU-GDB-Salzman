@@ -539,8 +539,478 @@ intermixed with your input to the program (which would've been present had we ca
 * Debug try1 again and set a breakpoint anywhere in display(), then run the program. Figure out how to display the stack along with the values of every local variable for each frame at the same time. Hint: If you did the previous exercise, and read each blurb, this should be easy.
 
 # Interlude: Debugging With Your Brian
+## Please Read Before Continuing
+As of SDL 1.2.11, it appears that SDL_SetVideoMode() no longer generates SIGFPE when passed SDL_OPENGL. This means you can use GDB to debug spinning_cube. However, this is still an excellent example of:
+
+How to debug with your brain.
+Why knowing theory, like the memory layout of a program, can be helpful when debugging.
+
+## Debugging With Your Brain
+In the last section we looked at how a program is laid out in memory. Knowing this is not only useful for debugging with GDB, but it's also useful for debugging without GDB. In this interlude, guest written by my close friend, Mark Kim, we'll see how.
+
+Compile and run spinning_cube.tar.bz2. A spinning cube is displayed with images of Geordi (white) and Juliette (calico), me on a New York City subway, and where I work.
+
+However, when you press a key, some of the cube's textures mysteriously vanish. My first instinct was to use GDB to find the problem, but I discovered that SDL programs that use OpenGL can't be debugged via GDB. Upon investigation, I found that when you pass the flag SDL_OPENGL to the function SDL_SetVideoMode(), a SIGFPE is generated which terminates the program. If you try to handle the SIGFPE, you'll find that SDL_SetVideoMode() never returns, so GDB is left in a hung state.
+
+I had just spent over 40 hours programming over the last 3 days and was getting punch-drunk. Not having GDB available pushed me over the edge and I sent an exasperated email to Mark for help. I got a reply within 10 minutes.
+
+Before continuing you'll want to:
+
+Run the program to see the bug in action. You need OpenGL and SDL to compile the program.
+Look at HandleKeyPress() in input.c, which handles keystrokes.
+Look at Debug(), in yerror.h, which is called from HandleKeyPress().
+Spend 10 minutes trying to fix the bug. This will make Mark's email all the more impressive. As you read Mark's email, pay particular attention to steps 6, 7B, and 7C for particular examples of sheer debugging brilliance!
+```
+   Hey Peter,
+   
+   The problem was there was an overlapping memory area between the debugging
+   variables and the texture variabes.  In video.[hc], the "texture[2]" array
+   should have been declared "texture[NUM_TEXURES]" instead.  Attached is a
+   patch file.
+   
+   The debugging process went like this:
+   
+      1. Try Debug() -- indeed it makes some textures disappear.
+   
+      2. Try debug_for_reals() into an empty function -- same happens,
+         so that's not the problem.
+   
+      3. Try removing each line of Debug() macro.  This revealed that
+         writing values into the "die_*" variables cause the texture
+         to disappear.
+   
+      4. So instead of calling Debug(), try writing some values into
+         the "die_*" variables -- the textures disappear again.
+   
+      5. Check if any other code is using those variables by changing
+         variable names and looking out for compilation errors --
+         nothing significant showed up.
+   
+      6. Perhaps someone is using the same memory space as the "die_*"
+         variables unintentionally.  I tried shifting the memory locations of
+         the "die_*" variables down by putting an array in front of them,
+         like this:
+   
+          yerror.c:
+   
+            ...
+            #include "yerror.h"
+   
+          + char buffer[1024];
+   
+            // Global Debugging/Dying Variables
+            const char *die_filename;
+            const char *die_function;
+            int        die_line;
+            bool       debug = true;
+   
+         which fixed the problem.  So now it's a matter of finding the
+         overlapping memory.
+   
+      7. Tracking down the problem needs some narrowing down of the
+         possiblilities, so I made the following assumptions:
+   
+         A. I know a problem like this occurs most often when an array
+            size is declared too short at another place, so there's probably
+            an array out there that's declared too short, and the "die_*"
+            variables, placed in memory right after that array, is probably
+            getting overwritten by some code expecting the array to be
+            longer.
+   
+            It could also be a pointer combined with malloc() but at this
+            point I'm just thinking about one problem at a time.
+   
+         B. The problem must be with either a global or static variable
+            since it's overlapping with another global variable
+            in the heap space.  So I'm looking for an array declared in
+            global or static scope.  That narrows down my search quite a bit.
+   
+            BTW, the fact that I'm looking for a variable that overlaps with
+            a global variable probably discounts malloc() from our potential
+            list of problems since malloc(), if the way I view the memory is
+            correct, should allocate memory only *after* all global
+            variables, and it's unlikely code accidentally writes to
+            a memory location before a pointer rather than an after
+            (though it's certainly possible to write to memory before
+            a pointer.)  But again, this is all an afterthought... I'm just
+            thinking about another global array at this point.
+   
+         C. I know the global array I'm looking for must be somehow linked
+            to a texture operation since that's what's being interfered by
+            writing to the "die_*" variables.  So I'm looking for a global
+            array that does something with textures, probably one that stores
+            textures or pointers to textures or index to textures or
+            something like that.
+   
+      8. And that's what I looked for.  texture[2] looked a little suspicious
+         so I tried expanding its size and that fixed the problem.  Just to
+         make sure, I looked for the code that writes to texture with index
+         greater than 1 and found init.c:127 and several places in render.c.
+   
+   Hope that helps!
+   
+   -Mark
+``` 
+
 # Chapter 3: Initialization, Listing And Running
+Where Are We Now?
+In the last chapter we learned about an executing process's memory layout which is divided into segments. One important segment is the call stack (or stack), which is a collection of stack frames (or frames). There is one frame for each function call, and the frame holds three important things:
+
+1. The local variables for the function.
+1. The current address pointer within the function.
+1. The arguments passed to the function.
+
+When a function is called, a new frame is allocated and added to the stack. When the function returns, its frame is returned back to unused stack memory and execution resumes at the address pointed to by the previous function's current address pointer. We can ask GDB to tell us what the stack looks like with the backtrace command. We can also find out which frame GDB's context is in using the frame command. Lastly, we can change GDB's context to the n'th frame using the frame n command.
+
+Executables don't contain references to object (function and variable) names or source code line numbers. It would be painful to debug a program without these things, so to debug a program, we generate an augmented symbol table using gcc's -g option.
+
+Lastly, we briefly learned how to make GDB pause execution using the break command and execute one line of source code using the step command. We'll have much more to say about these commands shortly.
+
 # Chapter 4: Breakpoints and Watchpoints
+## Where Are We Going To Go?
+In this chapter, we'll investigate the list command which (surprisingly) lists lines of source code. We'll take an in-depth look at GDB's initialization file .gdbinit. Lastly, we'll look at GDB's run command which executes a program from within GDB.
+
+## Basic Listing of Source Code
+Download derivative, a program that calculates numerical derivatives, to follow along with the discussion: derivative.tar.bz2. Take a moment to familiarize yourself with the code. Note the use of groovy function pointers.
+
+You can list source code with GDB's list command, abbreviated by l. Run GDB on the executable and use the list command:
+```
+   $ gdb driver
+   (gdb) list
+   12    }
+   13
+   14
+   15
+   16    int main(int argc, char *argv[])
+   17    {
+   18        double x, dx, ans;
+   19        double Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta;
+   20
+   21        if (argc != 1) {
+```
+By default, GDB always lists 10 lines of source code. When you first issue list, GDB lists 10 lines of source code centred on main(). Subsequent use of list gives the next 10 lines of source code. Try it:
+```
+   (gdb) list
+   22        printf("You must supply a value for the derivative location!\n");
+   23        return EXIT_FAILURE;
+   24    }
+   25
+   26    x   = atol(argv[1]);
+   27    ans = sin(log(x)) / x;
+   28
+   29    printf("%23s%10s%10s%11s%10s%11s\n", "Forward", "error", "Central",
+   30        "error", "Extrap", "error");
+   31
+   (gdb) 
+```
+Use list three more times, and you'll see:
+```
+        ... output suppressed
+   
+   45            printf("dx=%e: %.5e %.4f  %.5e %.4f  %.5e %.4f\n",
+   46                dx, Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta);
+   47        }
+   48  
+   49        return 0;
+   50    }
+   (gdb) list
+   Line number 51 out of range; driver.c has 50 lines.
+   (gdb) 
+```
+The second time we used list, only 9 lines were printed, since we reached the end of the file. The final list didn't print any lines. That's because list always prints 10 lines of code after the previously listed lines. There were simply no more lines of code to list.
+
+`list -` works like list, except in reverse. It lists the 10 lines previous to the last listed lines. Since line 50 was the last listed line, `list -` should print lines 41 through 50:
+```
+   (gdb) list -
+   41
+   42                Extr      = ExtrapolatedDiff(x, dx, &f);
+   43                ExtrDelta = fabs(Extr - ans);
+   44
+   45                printf("dx=%e: %.5e %.4f  %.5e %.4f  %.5e %.4f\n",
+   46                    dx, Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta);
+   47            }
+   48
+   49        return 0;
+   50    }
+   (gdb)
+```
+If you give list a line number, GDB lists 10 lines centered on that line number:
+```
+   (gdb) list 13
+   8
+   9      double f(double x)
+   10     {
+   11          return cos(log(x));
+   12     }
+   13
+   14
+   15
+   16     int main(int argc, char *argv[])
+   17     {
+   (gdb)
+```
+I'm going to suppress the output to conserve space, however I strongly encourage you to follow along with my examples by performing the operations in GDB yourself. Try to imagine what the output looks like before you actually perform the operation.
+
+Other listing operations you'll find useful:
+```
+    starting with some line number	(gdb) list 5,
+    ending with some line number	(gdb) list ,28
+    between two numbers:	(gdb) list 21,25
+    by function name:	(gdb) list f
+    functions in the other file:	(gdb) list CentralDiff
+    by filename and line number:	(gdb) list derivative.c:12
+    filename and function name:	(gdb) list derivative.c:ForwardDiff
+```
+`list` has a "memory" of what file was list used to print source code. We started out by listing lines from driver.c. We then switched to derivative.c by telling GDB to list CentralDiff(). So now, list is in the "context" of derivative.c. Therefore, if we use list by itself again, it'll list lines lines from derivative.c.
+```
+   (gdb) list
+   11    }
+   12
+   13
+   14
+   15     double ExtrapolatedDiff( double x, double dx, double (*f)(double) )
+   16     {
+   17         double term1 = 8.0 * ( f(x + dx/4.0) - f(x - dx/4.0) );
+   18         double term2 = ( f(x + dx/2.0) - f(x - dx/2.0) );
+   19
+   20         return (term1 - term2) / (3.0*dx);
+```
+But what if we wanted to start listing lines from driver.c again? How do we go back to that file? We simply list anything that lives in driver.c, like a function or line number. All these commands will reset list's command context from derivative.c back to driver.c:
+```
+   list main
+   list f
+   list driver.c:main
+   list driver.c:f
+   list driver.c:20
+```
+And so forth. The rules aren't complicated; you'll get the hang of them after debugging a few multi-file programs.
+
+### Listing By Memory Address (advanced)
+Every function begins at some memory address. You can find this address with the print function (which we'll cover later). For instance, we'll find the address for main():
+```
+   (gdb) print *main
+   $1 = {int (int, char **)} 0x8048647 <main>
+   (gdb)
+```
+So main() lives at 0x8048647. We can use list using memory locations as well; the syntax is very C'ish:
+```
+   (gdb) list *0x8048647
+   0x8048647 is in main (driver.c:17).
+   12     }
+   13
+   14
+   15
+   16     int main(int argc, char *argv[])
+   17     {
+   18          double x, dx, ans;
+   19          double Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta;
+   20
+   21          if (argc != 1) {
+   (gdb)
+```
+It stands to reason that 0x8048690 is also somewhere inside of main(). Let's find out:
+```
+   (gdb) list *0x8048690
+   0x8048690 is in main (driver.c:26).
+   21          if (argc != 1) {
+   22               printf("You must supply a value for the derivative location!\n");
+   23               return EXIT_FAILURE;
+   24          }
+   25
+   26          x   = atol(argv[1]);
+   27          ans = sin(log(x)) / x;
+   28
+   29          printf("%23s%10s%10s%11s%10s%11s\n", "Forward", "error", "Central",
+   30               "error", "Extrap", "error");
+   (gdb)
+```
+### Exercises
+* Using list and print *, figure out how many machine instructions are used for this line of code:
+    ```
+    18          double x, dx, ans;
+    19          double Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta;
+    ```
+* Think about this for a second; you'll learn a bit about compilers and machine instructions.
+
+### Setting The List Size
+GDB lists code in increments of 10 lines. Maybe that's too much. Or maybe that's too little. You can tell GDB to change the listing size with the set command and listsize variable:
+```
+   (gdb) set listsize 5
+   (gdb) list main
+   15
+   16     int main(int argc, char *argv[])
+   17     {
+   18          double x, dx, ans;
+   19          double Forw, ForwDelta, Cent, CentDelta, Extr, ExtrDelta;
+   (gdb)
+```
+### Exercises
+* There's actually a lot of things you can set. Issue help set from GDB's prompt. I'm not expecting you to read it all---I just want you to marvel at how big the list is!
+
+## The `.gdbinit` File
+Upon startup, GDB reads and executes an initialization file named .gdbinit. It can contain any command (eg set and break), and more. For example, "set listsize" and "set prompt" can go into .gdbinit. There are two locations where GDB will look for this file (in order):
+
+1. In your home directory
+1. In the current directory
+
+You can put commands to be executed for all your programming projects in $HOME/.gdbinit and project-specific commands in $PWD/.gdbinit.
+You can comment your .gdbinit files with bash's "#". And blank lines, of course, are ignored.
+
+### Exercises
+* When you invoke GDB, it prints a copyright notice. Using GDB's man page, figure out how to prevent GDB from printing this notice. Using your shell's alias feature, make an alias for "gdb" that invokes GDB, but surpresses the copyright notice. I use this alias myself.
+* Figure out how to reset GDB's prompt from (gdb) to something that tickles your fancy. Google would be a great way of figuring this out. GDB's help utility would also be useful (hint: you want to "set" the prompt to something else). Modify .gdbinit so that GDB uses your chosen prompt on startup.
+* You can even use terminal escape codes to put color in your GDB prompt! If you don't know about terminal color escape codes, you can read about them here. One caveat: You have to use the octal code `\033` for the escape character. So for example, bold blue would be `\033[01;34m`. And then don't forget to turn the blue off, otherwise everything will be blue. I'll let you figure out how to do that yourself! Thanks to Jeff Terrell for pointing this out to me!
+
+### A Caveat for Colored GDB Prompts
+*Thanks Eric Rannaud*
+According to the GDB documentation `binutils-gdb/readline/doc/rltech.texi` that comes with the GDB source code:
+
+Applications may indicate that the prompt contains characters that take up no physical screen space when displayed by bracketing a sequence of such characters with the special markers `@code{RL_PROMPT_START_IGNORE}` and `@code{RL_PROMPT_END_IGNORE}` (declared in `@file{readline.h`). This may be used to embed terminal-specific escape sequences in prompts.
+```
+   PROMPT_START_IGNORE is defined to \001
+   PROMPT_END_IGNORE is defined to \002
+```
+Without these characters, at least with xterm, the cursor is not always in the right place when using backspace, as gdb includes the terminal escape codes in its computation of the visible length of the prompt, which is wrong. With a simple colored "(gdb) " prompt, gdb thinks its length is 17, instead of 6.
+
+The fix is simple:
+```
+set prompt \001\033[1;32m\002(gdb)\001\033[0m\002\040
+```
+The `\040` is just a space -- better to escape it than to have to copy and paste a trailing blank space.
+
+### `gdbinit` on MS Windows
+*Thanks Ted Alves*
+The environment variable `HOME`, used by `.gdbinit`, is not normally defined in Windows. You must set/define it yourself: (you must be logged in as an Administrator to change the system variables) right-click My Computer, left-click Properties, left-click the Advanced tab, left-click the Environment Variables button. Now add New: HOME: "(your chosen path) `c:\documents and settings\username` and save it by clicking OK. Type "set" after rebooting to verify that it's there. You can also type `set HOME=(your chosen path)` to set it before rebooting, but this method isn't permanent.
+
+Windows Explorer will not accept (create) a file named `.gdbinit` but Windows itself has no problem with it. Create a file named something like: `gdb.init` in your `%HOME%` directory, then go to command-line and type `move gdb.init .gdbinit`. This will create the file and Explorer will now work with it. You might want to copy this (empty) file to your intended working directory(ies) before you edit in your commands for the HOME file.
+
+## Running A Program In GDB
+Let's properly introduce the run command. Download and compile arguments.tar.bz2.
+
+The run command with no arguments runs your program without command line arguments. If you want to give the program arguments, use the run command with whatever arguments you want to pass to the program:
+```
+   $ gdb arguments
+   (gdb) run 1 2
+   Starting program: try2 1 2
+   Argument 0: arguments
+   Argument 1: 1
+   Argument 2: 2
+   
+   Program exited normally.
+   (gdb)
+```
+Nothing could be simpler. From now on, whenever you use run again, it'll automatically use the arguments you just used (ie, "1 2"):
+```
+   (gdb) run
+   Starting program: arguments 1 2
+   Argument 0: arguments
+   Argument 1: 1
+   Argument 2: 2
+   
+   Program exited normally.
+   (gdb)
+```
+until you tell it to use different arguments:
+```
+   (gdb) run testing one two three
+   Starting program: arguments testing one two three
+   Argument 0: testing
+   Argument 1: one
+   Argument 2: two
+   Argument 3: three
+   
+   Program exited normally.
+   (gdb)
+```
+Suppose you want to run the program without command line arguments? How do you get run to stop automatically passing them? There's a "set args" command. If you give this command without any parameters, run will no longer automatically pass command line arguments to the program:
+```
+   (gdb) set args
+   (gdb) run
+   Starting program: arguments 
+   Argument 0: try2
+   
+   Program exited normally.
+   (gdb)
+```   
+If you do give an argument to set args, those arguments will be passed to the program the next time you use run, just as if you had given those arguments directly to run.
+
+There's one more use for set args. If you intend on passing the same arguments to a program every time you begin a debugging session, you can put it in your `.gdbinit` file. This will make run pass your arguments to the program without you having to specify them every time you start GDB on a given project.
+
+## Restarting A Program In GDB
+Sometimes you'll want to re-start a program in GDB from the beginning. One reason why you'd want to do this is if you find that the breakpoint you set is too late in the program execution and you want to set the breakpoint earlier. There are three ways of restarting a program in GDB.
+
+1. Quit GDB and start over.
+1. Use the `kill` command to stop the program, and run to restart it.
+1. Use the GDB command run. GDB will tell you the program is already running and ask if you want to re-run the program from the beginning.
+
+The last two options will leave everything intact: breakpoints, watchpoints, commands, convenience variables, etc. However, if you don't mind starting fresh with nothing saved from your previous debugging session, quitting GDB is certainly an option.
+
+You might be wondering why there's a kill command when you can either quit GDB with quit or re-run the program with run. The `kill` command seems kind of superfluous. There are some reasons why you'd use this command, and you can read about them [here](https://ftp.gnu.org/old-gnu/Manuals/gdb/html_node/gdb_23.html). Thanks to Suresh Babu for pointing out that the `kill` command may also be useful when you are remote debugging or if a process is debugged via the attach command. That said, I've never used `kill` myself.
+
+## Breakpoints and Watchpoints
+So far you know how to list source code and run a program from within gdb. But you already knew how to do that without gdb. What else does gdb give us? To do anything really useful with gdb, you need to set breakpoints which temporarily pause your program's execution so you can do useful debugging work like inspecting variables and watching the program's execution in an atomic line-by-line fashion. This right here is the magic of a symbolic debugger.
+
+Breakpoints come in three flavors:
+
+1. A **breakpoint** stops your program whenever a particular point in the program is reached. We will discuss breakpoints momentarily.
+1. A **watchpoint** stops your program whenever the value of a variable or expression changes. We'll discuss watchpoints later on in this chapter.
+1. A **catchpoint** stops your program whenever a particular event occurs. We won't discuss catchpoints until I get a chance to write about them.
+
+A breakpoint stops your program whenever a particular place in the program is reached. Here are some examples of what a breakpoint does:
+
+*Mr. Computer, won't you please stop when...*
+* *you reach line 420 of the current source code file?*
+* *you enter the function validateInput()?*
+* *you reach line 2718 of the file video.c?*
+
+All those requests have one thing in common: they ask gdb to stop based on reaching some location within the program. That's what a breakpoint does. There are two things I'd like to mention before we start:
+
+**What does "stopping at line 5" mean?**
+When gdb stops at "line 5", this means that gdb is currently waiting "between" lines 4 and 5. Line 5 hasn't executed yet. Keep this in mind! You can execute line 5 with the next command, but line 5 has not happened yet.
+
+**Why did gdb stop here?**
+Sometimes you may be surprised at where gdb stops. You may have specified a breakpoint at line 5 of the source code, but gdb could stop at line 7, for instance. This can happen for 2 reasons. First, if you compile a program with optimization set, some lines of source code may be optimized out of existence; they exist in your source code, but not in the executable. Secondly, not every line of source code gets compiled into machine code instruction. Consider the code below:
+```
+1   #include <stdio.h>
+2      
+3   int main( void )
+4   {
+5        int i;
+6        i = 3;
+7   
+8        return 0;
+9   }
+```
+Inserting a breakpoint at line X makes your program pause at line Y...
+| Unoptimized code   |                        | Optimized code         |                        |
+|:-------------------|------------------------|:-----------------------|------------------------|
+| Breakpoint at line | Program pauses at line | Breakpoint set at line | Program pauses at line |
+| 1--4, main()       | 4                      | 1--4, main()           | 4                      |
+| 5, 6               | 6                      | 5--9	               | 9                      |
+| 7, 8               | 8                      |                        |                        |
+| 9                  | 9                      |                        |                        |
+Each breakpoint, watchpoint, and catchpoint you set is assigned a number starting with 1. You use this number to refer to that breakpoint. To see the list of all breakpoints and watchpoints you've set, type info breakpoints (which can be abbreviated by i b. I show a sample resulting output:
+```
+	(gdb) info breakpoints 
+	Num Type           Disp Enb Address    What
+	1   breakpoint     keep y   0x080483f6 in main at try5.c:4
+			  breakpoint already hit 1 time
+	2   breakpoint     keep n   0x0804841a in display at try5.c:14
+			  breakpoint already hit 1 time
+	3   hw watchpoint  keep y   i
+```
+According to the output, there are two breakpoints, one at line 4 and the other at line 14 of the source code. They are assigned to numbers 1 and 2 respectively. There is also a watchpoint set: the program will halt whenever the variable i (local to display()) changes value.
+
+In addition to being assigned a number, each breakpoint and watchpoint can be enabled or disabled. A program's execution won't stop at a disabled breakpoint or watchpoint. By default, when you create a new breakpoint or watchpoint, it's enabled. To disable the breakpoint or watchpoint assigned to number n, type:
+```
+	disable n
+```
+To re-enable this breakpoint or watchpoint, type:
+```
+	enable n
+```
+If you look at the sample output of info breakpoints above, you'll see that breakpoint 2 has been disabled.
+
 # Chapter 5: Stepping and Resuming
 # Chapter 6: Debugging A Running Process
 # Chapter 7: Debugging Ncurses Programs
