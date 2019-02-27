@@ -142,9 +142,10 @@ It used to be the case that Linux could only be ported to architectures that had
 * Optional: If you want to know more about VM, here's a [link](https://en.wikipedia.org/wiki/Virtual_memory). This is much more than you need to know.
 
 ## Memory Layout
-That's how VM works. For the most part, each process's VM space is laid out in a similar and predictable manner:
+That's how VM works. For the most part, each process's VM space is laid out in a similar and predictable manner.
+
 | Memory         | Program Stack                    | Notes                                     |
-|----------------|----------------------------------|-------------------------------------------|
+|:---------------|:--------------------------------:|:------------------------------------------|
 | High Addresses | Args & Environment Vars          | Command line arguments & Environment Vars |
 |                | Stack (grows down)               |                                           |
 |                | Unused Memory                    |                                           |
