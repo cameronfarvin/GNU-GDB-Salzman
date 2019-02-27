@@ -144,7 +144,7 @@ It used to be the case that Linux could only be ported to architectures that had
 ## Memory Layout
 That's how VM works. For the most part, each process's VM space is laid out in a similar and predictable manner:
 | Memory         | Program Stack                    | Notes                                     |
-|:---------------|:--------------------------------:|:------------------------------------------|
+|----------------|----------------------------------|-------------------------------------------|
 | High Addresses | Args & Environment Vars          | Command line arguments & Environment Vars |
 |                | Stack (grows down)               |                                           |
 |                | Unused Memory                    |                                           |
