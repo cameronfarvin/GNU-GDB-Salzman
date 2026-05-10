@@ -19,9 +19,9 @@ I'm in a perpetual state of learning, and thanks goes to the following people wh
 * Mark K. Kim: Who never tires of my questions and has an amazing ability to incorporate out-of-box thinking with formal learning. A true hacker, good friend, and humble guy.
 
 ## Authorship and Copyright
-This entire tutorial is copyright (c) 2004 Peter Jay Salzman, p@dirac.org. Permission is granted to copy, distribute and/or modify it under the terms of The Open Source License, version 1.1. You can find a copy of this license at opensource.org/licenses/osl.php
+This entire tutorial is copyright (c) 2004 Peter Jay Salzman, [p@dirac.org](mailto:p@dirac.org). Permission is granted to copy, distribute and/or modify it under the terms of The Open Source License, version 3.0. You can find a copy of this license at [https://opensource.org/licenses/OSL-3.0](https://opensource.org/licenses/OSL-3.0)
 
-The canonical and most updated version of this document can be found at www.dirac.org/linux/gdb.
+The canonical and most updated version of this document can be found at [www.dirac.org/linux/gdb](http://www.dirac.org/linux/gdb).
 
 If you want to create a derivative work or publish this document for commercial purposes, I would appreciate it if you contacted me first. This will give me a chance to give you the most recent version. It'll also stroke my ego. I'd also appreciate either a copy of whatever it is you're doing or a spinach, garlic, mushroom, feta cheese and artichoke heart pizza.
 
@@ -42,15 +42,15 @@ The following people sent in corrections:
 * Doug Yoder
 
 ## A Plug For The EFF
-If you're not a member of the EFF, you must stop everything you're doing and become a member right this moment. 9/11 was a horrible tragedy; I was in New York City at the time and witnessed the chaos with my own two eyes. I love my country, and am a very proud United States citizen, but the steady erosion of our freedoms and civil liberty is another tragic casualty of the post 9/11 era. I'm very worried for my country.
+If you're not a member of the [EFF](http://www.eff.org), you must stop everything you're doing and become a member right this moment. 9/11 was a horrible tragedy; I was in New York City at the time and witnessed the chaos with my own two eyes. I love my country, and am a very proud United States citizen, but the steady erosion of our freedoms and civil liberty is another tragic casualty of the post 9/11 era. I'm very worried for my country.
 
-The EFF is the most important defense we have in protecting our on-line and digital rights. If you have any interest in protecting your civil liberties in a digital age that has gone out of balance, please read their very short mission. Please consider becoming a member of the EFF. Honestly, it's only the price of a pizza. Or the cost of two movie tickets plus popcorn.
+The EFF is the most important defense we have in protecting our on-line and digital rights. If you have any interest in protecting your civil liberties in a digital age that has gone out of balance, please read their very short mission. Please consider becoming a [member](https://secure.eff.org/) of the EFF. Honestly, it's only the price of a pizza. Or the cost of two movie tickets plus popcorn.
 
 ## A Request For Help
 This tutorial took (takes?) more time than I care to admit. It's a tremendous job. If you found this tutorial to be at all useful, please consider helping me maintain and actively develop it. There are many ways you can help. Pick one that suits you or your talents (in no particular order):
 
-* Become a member of the EFF, or buy their merchandise.
-* Become a member of the FSF, or buy their merchandise.
+* Become a [member of the EFF](https://supporters.eff.org/donate/join-or-renew-your-membership), or buy their [merchandise](https://supporters.eff.org/shop).
+* Become a [member of the FSF](https://my.fsf.org/join), or buy their [merchandise](https://shop.fsf.org/collection/gnu-gear).
 * If you're handy with HTML or PHP, please send an email offering to help with the website. I don't want fancy pages (I want lynx/links users to be able to use this site), but I'm really just a "hack" at HTML and PHP. If you're handy with design or formatting, please offer some advice on how to make my pages more readable and good looking.
 * Report spelling errors, technical errors, and broken links.
 * Email me questions. Tell me if something isn't clear.
@@ -82,31 +82,31 @@ You'll be able to find and fix your bugs faster using a symbolic debugger like G
 ## What Is GDB?
 In the previous section I told you what a symbolic debugger is. There are actually MANY symbolic debuggers, and in the next section I'll mention some of them. However, this tutorial is about one particular debugger which I use, called GDB.
 
-GDB is a debugger which is part of the Free Software Foundation's GNU operating system. Its original author is Richard M. Stallman (affectionately known as "RMS", one of the finest heroes of the free software movement), and has a long and impressive list of contributors, including some interesting corporate sponsorship for support under various architectures. It's a wonderful piece of software and outclasses nearly every other debugger I've seen, including commercial ones.
+GDB is a debugger which is part of the [Free Software Foundation's](http://www.gnu.org) GNU operating system. Its original author is Richard M. Stallman (affectionately known as "[RMS](http://www.stallman.org)", one of the finest heroes of the free software movement), and has a long and impressive list of [contributors](http://sources.redhat.com/gdb/download/onlinedocs/gdb_1.html#SEC4), including some interesting corporate sponsorship for support under various architectures. It's a wonderful piece of software and outclasses nearly every other debugger I've seen, including commercial ones.
 
 GDB can be used to debug C, C++, Objective-C, Fortran, Java and Assembly programs. There's partial support for Modula-2 and Pascal. It'll run on any architecture you can think of that supports Unix, so learning GDB on your home PC will give you the power to debug code anywhere Unix can run!
 
 Way back when, dbx was the canonical debugger people used on Unix systems. With the advent of GNU being the standard by which all Unix systems are measured, GDB became the canonical debugger of the debugging world. As a result, even commercial debuggers have a tendency to be command compatible (or even idea compatible) with GDB, so learning GDB will enable you to use a whole slew of other debuggers. In short, if you learn GDB, you will be able to debug anything almost anywhere with any debugger in the Unix world.
 
-GDB's homepage is located at www.gnu.org/software/gdb/gdb.htmland as of Nov 2006, is up to version 6.4.
+GDB's homepage is located at [www.gnu.org/software/gdb/gdb.html](http://www.gnu.org/software/gdb/gdb.html) and as of Nov 2006, is up to version 6.4.
 
-GDB is copyleft software (meaning that not only is GDB free software, but all publicly released derivatives and enhancements people make to GDB must also be free) and is licensed under the GNU GPL
+GDB is [copyleft](http://www.gnu.org/licenses/licenses.html#WhatIsCopyleft) software (meaning that not only is GDB free software, but all publicly released derivatives and enhancements people make to GDB must also be free) and is licensed under the GNU [GPL](http://opensource.org/licenses/gpl-license.php)
 
 ## Other Symbolic Debuggers
-This section documents other debuggers, both actively developed and long gone. I give a short history when the information is available. Any additions (history, debuggers not listed here, other front ends, screenshots), please let me know.
+This section documents other debuggers, both actively developed and long gone. I give a short history when the information is available. Any additions (history, debuggers not listed here, other front ends, screenshots), please [let me know](mailto:p@dirac.org).
 
 ### Debuggers
-* The first debugger that I know of was called dbx, and like GDB, was command line driven. The text UI of GDB was written to resemble dbx, although the two debuggers are not command line compatible. Other symbolic debuggers were written so that their UI resembled dbx (or GDB) as well. For this reason, you'll find many command line debuggers to be quite similar. If you learn to use GDB, you'll largely be able to navigate through most other debuggers.
-* ups is another debugger originally developed by Mark Russell but is now updated by Rod Armstrong. It also comes with its own theme song. Ups includes a C interpreter which allows you to add fragments of code simply by editing them into the source window (the source file itself is not modified). Perversely, this lets you add debugging `printf()` calls without recompiling, relinking or even restarting the target program. ups supports C, C++ and limited FORTRAN debugging on SunOS, Solaris, Linux and FreeBSD.
-* The Portland Group sells an excellent high-quality GUI debugger named pgdbg. pgdbg specializes in debugging all kinds of parallel code on many different kinds of clusters (distributed memory, SMP servers, etc). While pgdb is a very high-powered debugger, it's also expensive.
+* The first debugger that I know of was called dbx, and like GDB, was command line driven. The text UI of GDB was written to resemble dbx, although the two debuggers [are not command line compatible](http://www.dartmouth.edu/~rc/classes/soft_dev/gdb_and_dbx.html). Other symbolic debuggers were written so that their UI resembled dbx (or GDB) as well. For this reason, you'll find many command line debuggers to be quite similar. If you learn to use GDB, you'll largely be able to navigate through most other debuggers.
+* [ups](http://ups.sourceforge.net) is another debugger originally developed by Mark Russell but is now updated by Rod Armstrong. It also comes with its own [theme song](ftp://ftp.x.org/R5contrib/ups-song.au). Ups includes a C interpreter which allows you to add fragments of code simply by editing them into the source window (the source file itself is not modified). Perversely, this lets you add debugging `printf()` calls without recompiling, relinking or even restarting the target program. ups supports C, C++ and limited FORTRAN debugging on SunOS, Solaris, Linux and FreeBSD.
+* The [Portland Group](http://www.pgroup.com) sells an excellent high-quality GUI debugger named [pgdbg](http://www.pgroup.com/tools/pgdbg.htm). pgdbg specializes in debugging all kinds of parallel code on many different kinds of clusters (distributed memory, SMP servers, etc). While pgdb is a very high-powered debugger, it's also expensive.
 
 ### Front Ends
 * xwpe.
-* The most popular GDB front end is DDD, the Data Display Debugger which uses the Motif widget set. DDD has some nice features: it can give you graphical representations of linked lists, ADT's and trees. In addition, DDD is a front end to the Python, Java and Perl debuggers as well. I personally don't use DDD much, but I still appreciate it. DDD used to be quite buggy. Over the years it has stopped crashing regularly(!) on me, but as of March 2003, still crashes on a blue moon. In addition, the pop-up command tool definitely has "issues" with window managers that have multiple screens, like Enlightenment.
+* The most popular GDB front end is DDD, the [Data Display Debugger](http://www.gnu.org/software/ddd) which uses the Motif widget set. DDD has some nice features: it can give you graphical representations of linked lists, ADT's and trees. In addition, DDD is a front end to the Python, Java and Perl debuggers as well. I personally don't use DDD much, but I still appreciate it. DDD used to be quite buggy. Over the years it has stopped crashing regularly(!) on me, but as of March 2003, still crashes on a blue moon. In addition, the pop-up command tool definitely has "issues" with window managers that have multiple screens, like Enlightenment.
 * tgdb is a Tcl/Tk front end for GDB first written in 1994 by a company named HighTec EDV-Systeme GmbH, in Germany. It was shareware (asking price was $30). Development and support seems to have ended many years ago. It shouldn't be confused with "trivial gdb" which is also called tgdb.
 * xdbx is a front end to dbx that was created by Po Cheung of Microelectronics and Computer Technology Corporation (MCC) in March 10, 1989. It uses the old X Athena widget set (libxaw). It has its own license which is open source but not copyleft. Development died a long, long time ago.
 * xxgdb is a front end to GDB that was created in December 1990 by Pierre Willard. It has its own license which is open source but not copyleft. It's built from the source code for xdbx; basically, xxgdb is xdbx adapted to GDB instead of dbx. xxgdb uses the old X Athena widget set (libxaw). It currently doesn't run on any system that uses unix98 posix TTYs. Development died in 2002. It most likely doesn't work with current versions of GDB.
-* mxgdb is a Motif based front end for GDB written by Jim Tsillas back in January 3 1992. mxgdb is based on xxgdb: Jim ported xxgdb from the Athena widget set to the Motif widget set (in turn, xxgdb was a GDB port of xdbx). It's licensed under the GNU GPL and was last maintained (I think) by Robert Stockmann. It most likely doesn't work with current GDB versions.
+* [mxgdb](http://www.boutell.com/lsm/lsmbyid.cgi/001337) is a Motif based front end for GDB written by Jim Tsillas back in January 3 1992. mxgdb is based on xxgdb: Jim ported xxgdb from the Athena widget set to the Motif widget set (in turn, xxgdb was a GDB port of xdbx). It's licensed under the GNU GPL and was last maintained (I think) by Robert Stockmann. It most likely doesn't work with current GDB versions.
 
 # Chapter 2: Memory Layout and the Stack
 ## Where Are We Going To Go?
@@ -138,7 +138,7 @@ It used to be the case that Linux could only be ported to architectures that had
 
 #### Exercises
 
-* Read a short Wikipedia blurb on the MMU
+* Read a short Wikipedia blurb on the [MMU](http://en.wikipedia.org/wiki/Memory_management_unit)
 * Optional: If you want to know more about VM, here's a [link](https://en.wikipedia.org/wiki/Virtual_memory). This is much more than you need to know.
 
 ## Memory Layout
@@ -213,7 +213,7 @@ You can also get the size of the sections of the object file using "objdump -h" 
 * The size command didn't list a stack or heap segment for hello_world or hello_world.o. Why do you think that is?
 * There are no global variables in hello_world-1.c. Give an explanation for why size reports that the data and bss segments have zero length for the object file but non-zero length for the executable.
 * size and objdump report different sizes for the text segment. Can you guess where the discrepancy comes from? Hint: How big is the discrepancy? See anything of that length in the source code?
-* Optional: Read [this](https://en.wikipedia.org/wiki/Object_file) link about object file formats.
+* Optional: Read [this](https://en.wikipedia.org/wiki/Object_file_format) link about object file formats.
 
 ## Stack Frames And The Stack
 You just learned about the memory layout for a process. One section of this memory layout is called the stack, which is a collection of stack frames. Each stack frame represents a function call. As functions are called, the number of stack frames increases, and the stack grows. Conversely, as functions return to their caller, the number of stack frames decreases, and the stack shrinks. In this section, we learn what a stack frame is. A very detailed explanation, but we'll go over what's important for our purposes.
@@ -546,9 +546,9 @@ How to debug with your brain.
 Why knowing theory, like the memory layout of a program, can be helpful when debugging.
 
 ## Debugging With Your Brain
-In the last section we looked at how a program is laid out in memory. Knowing this is not only useful for debugging with GDB, but it's also useful for debugging without GDB. In this interlude, guest written by my close friend, Mark Kim, we'll see how.
+In the last section we looked at how a program is laid out in memory. Knowing this is not only useful for debugging with GDB, but it's also useful for debugging without GDB. In this interlude, guest written by my close friend, [Mark Kim](http://cbreak.org), we'll see how.
 
-Compile and run spinning_cube.tar.bz2. A spinning cube is displayed with images of Geordi (white) and Juliette (calico), me on a New York City subway, and where I work.
+Compile and run [spinning_cube.tar.bz2](https://www.dirac.org/linux/gdb/code/02/spinning_cube.tar.bz2). A spinning cube is displayed with images of Geordi (white) and Juliette (calico), me on a New York City subway, and where I work.
 
 However, when you press a key, some of the cube's textures mysteriously vanish. My first instinct was to use GDB to find the problem, but I discovered that SDL programs that use OpenGL can't be debugged via GDB. Upon investigation, I found that when you pass the flag SDL_OPENGL to the function SDL_SetVideoMode(), a SIGFPE is generated which terminates the program. If you try to handle the SIGFPE, you'll find that SDL_SetVideoMode() never returns, so GDB is left in a hung state.
 
@@ -671,7 +671,7 @@ Lastly, we briefly learned how to make GDB pause execution using the break comma
 In this chapter, we'll investigate the list command which (surprisingly) lists lines of source code. We'll take an in-depth look at GDB's initialization file .gdbinit. Lastly, we'll look at GDB's run command which executes a program from within GDB.
 
 ## Basic Listing of Source Code
-Download derivative, a program that calculates numerical derivatives, to follow along with the discussion: derivative.tar.bz2. Take a moment to familiarize yourself with the code. Note the use of groovy function pointers.
+Download derivative, a program that calculates numerical derivatives, to follow along with the discussion: [derivative.tar.bz2](https://www.dirac.org/linux/gdb/code/03/derivative/broken/derivative.tar.bz2). Take a moment to familiarize yourself with the code. Note the use of groovy function pointers.
 
 You can list source code with GDB's list command, abbreviated by l. Run GDB on the executable and use the list command:
 ```
@@ -859,7 +859,7 @@ You can comment your .gdbinit files with bash's "#". And blank lines, of course,
 ### Exercises
 * When you invoke GDB, it prints a copyright notice. Using GDB's man page, figure out how to prevent GDB from printing this notice. Using your shell's alias feature, make an alias for "gdb" that invokes GDB, but surpresses the copyright notice. I use this alias myself.
 * Figure out how to reset GDB's prompt from (gdb) to something that tickles your fancy. Google would be a great way of figuring this out. GDB's help utility would also be useful (hint: you want to "set" the prompt to something else). Modify .gdbinit so that GDB uses your chosen prompt on startup.
-* You can even use terminal escape codes to put color in your GDB prompt! If you don't know about terminal color escape codes, you can read about them here. One caveat: You have to use the octal code `\033` for the escape character. So for example, bold blue would be `\033[01;34m`. And then don't forget to turn the blue off, otherwise everything will be blue. I'll let you figure out how to do that yourself! Thanks to Jeff Terrell for pointing this out to me!
+* You can even use terminal escape codes to put color in your GDB prompt! If you don't know about terminal color escape codes, you can read about them [here](http://www-106.ibm.com/developerworks/library/l-tip-prompt). One caveat: You have to use the octal code `\033` for the escape character. So for example, bold blue would be `\033[01;34m`. And then don't forget to turn the blue off, otherwise everything will be blue. I'll let you figure out how to do that yourself! Thanks to Jeff Terrell for pointing this out to me!
 
 ### A Caveat for Colored GDB Prompts
 *Thanks Eric Rannaud*
@@ -885,7 +885,7 @@ The environment variable `HOME`, used by `.gdbinit`, is not normally defined in 
 Windows Explorer will not accept (create) a file named `.gdbinit` but Windows itself has no problem with it. Create a file named something like: `gdb.init` in your `%HOME%` directory, then go to command-line and type `move gdb.init .gdbinit`. This will create the file and Explorer will now work with it. You might want to copy this (empty) file to your intended working directory(ies) before you edit in your commands for the HOME file.
 
 ## Running A Program In GDB
-Let's properly introduce the run command. Download and compile arguments.tar.bz2.
+Let's properly introduce the run command. Download and compile [arguments.tar.bz2](https://www.dirac.org/linux/gdb/code/03/arguments/arguments.tar.bz2).
 
 The run command with no arguments runs your program without command line arguments. If you want to give the program arguments, use the run command with whatever arguments you want to pass to the program:
 ```
@@ -1013,7 +1013,7 @@ If you look at the sample output of info breakpoints above, you'll see that brea
 
 # Chapter 5: Stepping and Resuming
 ## Setting Breakpoints In Single File Programs
-There are many ways to set breakpoints. We'll go over each in turn. If you feel up to it, download try5.c and follow my example. Otherwise, you can simply follow the text (I list try5.c in the previous section). It's better if you do this alongside the tutorial, but since I'm showing gdb's output, it's not necessary. First, compile try5.c for debugging.
+There are many ways to set breakpoints. We'll go over each in turn. If you feel up to it, download [try5.c](https://www.dirac.org/linux/gdb/code/05/try5/try5.c) and follow my example. Otherwise, you can simply follow the text (I list try5.c in the previous section). It's better if you do this alongside the tutorial, but since I'm showing gdb's output, it's not necessary. First, compile try5.c for debugging.
 
 ```
    $ gcc -Wall -W -g -o try5 try5.c
@@ -1579,7 +1579,7 @@ You can list the lines centred around that address by specifying the asterisk (f
 ## Debugging A Running Process
 So far, we've debugged executables, with and without core files. However, we can debug processes too. Think about that -- we can debug a process that has already been started outside the debugger. There are two ways of doing this: Using command line arguments and using the attach command.
 
-Download and read beer-process.c and its Makefile. Compile it, and run it as a background job in one console (or xterm). It'll simply print out the number of bottles of beer on the wall:
+Download and read [beer-process.c](https://www.dirac.org/linux/gdb/code/running_process/beer-process.c) and its Makefile. Compile it, and run it as a background job in one console (or xterm). It'll simply print out the number of bottles of beer on the wall:
 ```
    $ ./beer-process &
    [1] 17399
@@ -1735,12 +1735,12 @@ Debug the process and look at the call stack:
 
 # Chapter 7: Debugging Ncurses Programs
 ## Ncurses
-Activities like printing characters to a screen, moving the cursor, and changing the color of character output are collectively known as *screen handling*. By its nature, screen handling is very terminal dependent, however, the terminfo and termcap mechanisms were devised to provide terminal independent screen handling. The curses library (a pun on the term "cursor optimization") was created to provide a screen handling API for C programmers. The goal of curses was to provide a fast, portable, and terminal independent C API to handle device dependent terminal codes.
+Activities like printing characters to a screen, moving the cursor, and changing the color of character output are collectively known as *screen handling*. By its nature, screen handling is very terminal dependent, however, the terminfo and termcap mechanisms were devised to provide terminal independent screen handling. The [curses](http://en.wikipedia.org/wiki/curses) library (a pun on the term "cursor optimization") was created to provide a screen handling API for C programmers. The goal of curses was to provide a fast, portable, and terminal independent C API to handle device dependent terminal codes.
 
-Curses has a very long and twisted history. However, the most commonly used modern implementation of the library is called *new curses*, or ncurses, for short. Ncurses is a GNU project released under an MIT style licence and is used under nearly all modern Unixes including GNU/Linux, and Mac OS X. There are now many extensions to ncurses which includes panels, menus and even a full featured widget set: the Curses Development Kit (CDK).
+Curses has a very long and twisted history. However, the most commonly used modern implementation of the library is called *new curses*, or [ncurses](http://en.wikipedia.org/wiki/ncurses), for short. Ncurses is a GNU project released under an MIT style licence and is used under nearly all modern Unixes including GNU/Linux, and Mac OS X. There are now many extensions to ncurses which includes panels, menus and even a full featured widget set: the [Curses Development Kit](http://www.vexus.ca/products/CDK) (CDK).
 
 ## Getting Started
-To follow along, download ncurses1.
+To follow along, download [ncurses1](https://www.dirac.org/linux/gdb/code/07/ncurses1/ncurses1.tar.bz2).
 ```c
 1   // ncurses1.c
 2   #include<ncurses.h>
@@ -1850,7 +1850,7 @@ Let's go through a sample debugging session of debugging_ncurses.c. The problem 
 
 # Chapter 8: Other Stuff
 ## Official Sources
-* The official GNU GDB page is at sources.redhat.com/gdb. You can download versions of GDB from the current developer's CVS all the way to the version released back in 1988!.
+* The official GNU GDB page is at [sources.redhat.com/gdb](http://sources.redhat.com/gdb). You can download versions of GDB from the current developer's CVS all the way to the version released back in 1988!.
 * There are a number of mailing lists for GDB, including:
   * **gdb-announce:** a read-only low volume list for the posting of announcements about releases or important events.
   * **gdb:** a list for general discussion about GDB.
@@ -1860,16 +1860,16 @@ Let's go through a sample debugging session of debugging_ncurses.c. The problem 
   * **gdb-cvs:** is where CVS commit messages go when things are checked into the GDB CVS repository.
   * **src-cvs:** is where CVS commit messages for the top-level files and shared directories go.
   * **bug-gdb:** bug reports and discussion of bugs in GDB.
-* GNU's official GDB user manual in html and PDF.
-* The GDB Internals Manual.
+* GNU's official GDB user manual in [html](http://sources.redhat.com/gdb/onlinedocs/gdb_toc.html) and PDF.
+* The [GDB Internals Manual](http://sources.redhat.com/gdb/onlinedocs/gdbint_toc.html).
 
 ## Other Tutorials
-* The official user's manual in various formats.
-* An excellent tutorial by Norm Matloff. Highly recommended.
-* A very brief tutorial by Ben Sussman.
-* A very good tutorial, called "RMS's GDB Tutorial". His initials happen to be "RMS". Heh. Very droll!
-* A *very* brief GDB tutorial.
-* A tutorial that focuses on C++.
+* The [official user's manual](http://sources.redhat.com/gdb/current/onlinedocs) in various formats.
+* An excellent [tutorial](http://heather.cs.ucdavis.edu/~matloff/UnixAndC/CLanguage/Debug.html) by Norm Matloff. Highly recommended.
+* A very brief [tutorial](http://www.cs.princeton.edu/~benjasik/gdb/gdbtut.html).
+* A very good [tutorial](http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html), called "RMS's GDB Tutorial". His initials happen to be "RMS". Heh. Very droll!
+* A *very* brief GDB [tutorial](http://galton.uchicago.edu/~gosset/Compdocs/gdb.html).
+* A [tutorial](http://www.cs.usyd.edu.au/~sholden/TEACHING/PP/2000sem2/TUTES/week7/gdb.html) that focuses on C++.
 
 ## Kudos
 I've received some great email from around the world. I have a keen interest in other peoples' cultures, their likes, dislikes, what they do, who they are. I'd love to fly to each country and make each one of these people my personal friend. But I can't, so I'll simply post some of the fantastic "kudos" that this page has generated.
