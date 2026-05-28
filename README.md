@@ -3,25 +3,27 @@
 
 # Chapter 0: Administrata
 ## Why Write This Tutorial?
-This is one of the most comprehensive GDB tutorials on the Internet. It's more than you'd find in most books, which tend to discuss GDB as a lightning-fast afterthought. I wrote this document because I couldn't find a good GDB tutorial. The only comprehensive source of information about GDB is GNU's GDB User's Manual, but learning GDB from it is like learning a foreign language from a dictionary.
+This is one of the most comprehensive GDB tutorials on the Internet. It's more than you'd find in most books, which tend to discuss GDB as an afterthought. I initially wrote this because I couldn't find a good GDB tutorial. The only source of information about GDB is GNU's GDB User's Manual (this was 1997, so a long time ago by now), but learning GDB from it is like learning a foreign language from a dictionary.
 
-I'll be using sample programs, and there will be links to the source code in each section that uses them, along with compilation instructions. I urge you to download the code and follow along with the examples. Following along, doing it yourself as you read, is really the best way to learn.
+I'll be using sample programs, and there will be links to the source code in each section that uses them, along with compilation instructions. I urge you to download the code and follow along with the examples. Following along, doing it yourself as you read, is really the second best way to learn.
 
-## Acknowledgements and Dedication
+The best way to learn is by playing. Go beyond the scope of what I talk about. Use your knowledge in ways neither of us anticipated. Not everyone has the capacity to "play" with knowledge, but if you're one of them, experimenting with your own ideas and curiosities will take you far.
+
+## Acknowledgements And Dedication
 This tutorial is sincerely and respectfully dedicated to Richard M. Stallman, the most important and under appreciated hero of the Free Software movement.
 
 I'm in a perpetual state of learning, and thanks goes to the following people who've helped me understand C and GDB:
-* Will Deutsch: For answering questions about GDB.
-* Mike Simons: For answering questions about GDB.
-* Paul Hinton: of Wolfram Research for convincing me to try this crazy thing called "GNU/Linux".
-* Jeff Newmiller: Who has yet to be stumped by any question I throw at him.
-* Norm Matloff: Who seems to know everything that I don't know (which is a LOT!)
-* Mark K. Kim: Who never tires of my questions and has an amazing ability to incorporate out-of-box thinking with formal learning. A true hacker, good friend, and humble guy.
+* **Will Deutsch:** For answering questions about GDB.
+* **Mike Simons:** For answering questions about GDB.
+* **Paul Hinton:** of Wolfram Research for convincing me to try this crazy thing called "GNU/Linux".
+* **Jeff Newmiller:** Who has yet to be stumped by any question I throw at him.
+* **Norm Matloff:** Who seems to know everything that I don't know (which is a LOT!)
+* **Mark K. Kim:** Who never tires of my questions and has an amazing ability to incorporate out-of-box thinking with formal learning. A true hacker, good friend, and humble guy.
 
 ## Authorship and Copyright
-This entire tutorial is copyright (c) 2004 Peter Jay Salzman, p@dirac.org. Permission is granted to copy, distribute and/or modify it under the terms of The Open Source License, version 1.1. You can find a copy of this license at opensource.org/licenses/osl.php
+This entire tutorial is copyright (c) 2004 Peter Jay Salzman, [p@dirac.org](mailto:p@dirac.org). Permission is granted to copy, distribute and/or modify it under the terms of The Open Source License, version 3.0. You can find a copy of this license at [https://opensource.org/licenses/OSL-3.0](https://opensource.org/licenses/OSL-3.0)
 
-The canonical and most updated version of this document can be found at www.dirac.org/linux/gdb.
+The canonical and most updated version of this document can be found at [www.dirac.org/linux/gdb](http://www.dirac.org/linux/gdb).
 
 If you want to create a derivative work or publish this document for commercial purposes, I would appreciate it if you contacted me first. This will give me a chance to give you the most recent version. It'll also stroke my ego. I'd also appreciate either a copy of whatever it is you're doing or a spinach, garlic, mushroom, feta cheese and artichoke heart pizza.
 
@@ -30,7 +32,7 @@ There are exercises at the end of most sections. The exercises are mandatory. Th
 
 There are topics I don't cover except for in the exercises. This isn't because I'm lazy. It's because I want you to think. Use your noggin to begin understanding concepts in your own words, not in my words. I want you to develop intuition. The best debugging tool is not GDB. And it certainly isn't `printf()`. The best debugging tool is your brain.
 
-## Thank You's
+## Thank Yous
 The following people sent in corrections:
 * Nick
 * Jason E. Siefken
@@ -41,24 +43,40 @@ The following people sent in corrections:
 * Aaron Mayerson
 * Doug Yoder
 
-## A Plug For The EFF
-If you're not a member of the EFF, you must stop everything you're doing and become a member right this moment. 9/11 was a horrible tragedy; I was in New York City at the time and witnessed the chaos with my own two eyes. I love my country, and am a very proud United States citizen, but the steady erosion of our freedoms and civil liberty is another tragic casualty of the post 9/11 era. I'm very worried for my country.
+## A Plug For The Electronic Frontier Foundation (EFF)
+If you're not a member of the [EFF](http://www.eff.org), you must stop everything you're doing and become a member right this moment. 9/11 was a horrible tragedy; I was in New York City at the time and witnessed the chaos with my own two eyes. I love my country, and am a very proud United States citizen, but the steady erosion of our freedoms and civil liberty is another tragic casualty of the post 9/11 era. I'm very worried for my country.
 
-The EFF is the most important defense we have in protecting our on-line and digital rights. If you have any interest in protecting your civil liberties in a digital age that has gone out of balance, please read their very short mission. Please consider becoming a member of the EFF. Honestly, it's only the price of a pizza. Or the cost of two movie tickets plus popcorn.
+The EFF is the most important defense we have in protecting our on-line and digital rights. If you have any interest in protecting your civil liberties in a digital age that has gone out of balance, please read their very short [mission](http://www.eff.org/about/). Please consider becoming a [member](https://secure.eff.org/) of the EFF. Honestly, it's only the price of a pizza. Or the cost of two movie tickets plus popcorn.
 
 ## A Request For Help
 This tutorial took (takes?) more time than I care to admit. It's a tremendous job. If you found this tutorial to be at all useful, please consider helping me maintain and actively develop it. There are many ways you can help. Pick one that suits you or your talents (in no particular order):
 
-* Become a member of the EFF, or buy their merchandise.
-* Become a member of the FSF, or buy their merchandise.
+* Become a [member of the EFF](https://supporters.eff.org/donate/join-or-renew-your-membership), or buy their [merchandise](https://supporters.eff.org/shop).
+* Become a [member of the FSF](https://my.fsf.org/join), or buy their [merchandise](https://shop.fsf.org/collection/gnu-gear).
 * If you're handy with HTML or PHP, please send an email offering to help with the website. I don't want fancy pages (I want lynx/links users to be able to use this site), but I'm really just a "hack" at HTML and PHP. If you're handy with design or formatting, please offer some advice on how to make my pages more readable and good looking.
 * Report spelling errors, technical errors, and broken links.
 * Email me questions. Tell me if something isn't clear.
-* Send me a picture postcard from where you live. Better yet, send me a letter with either a picture of yourself or the area where you live. Let me know how you got involved with free software and what you use GDB for. My mailing address is Peter Jay Salzman, 111 Montague Street, Brooklyn NY 11201, USA.
+* Send me a picture postcard from where you live. Better yet, send me a letter with either a picture of yourself or the area where you live. Let me know how you got involved with free software and what you use GDB for. My mailing address is Peter Jay Salzman, 416 68th Street apt 1-B, Brooklyn NY 11220, USA.
 * Proofread.
 * If you live in Italy, email me pictures of pizza from your country. No, this isn't a joke. I really love pizza.
 
 I may not respond to all email. It really depends on how busy my life is at the moment (this isn't my whole life, you see). If I have time, I'll try to reply. But please don't get upset if I can't reply. It means I'm swamped with work and can't afford to reply. Rest assured, even if you don't hear from me, receiving an email from you is still helpful. It reassures me that people are reading and benefiting from my work.
+
+## Links to my GDB pages
+Some day I'd like to see my GDB tutorial as the first return on a Google search for "GDB tutorial". If you find my tutorial to be at all useful, please link to it and give me some Google-love. :) I'll return the favor. So far, these GDB pages have been linked to by:
+
+* The [Debian GNU/Linux](http://www.debian.org) package comes with a file usr/share/doc/gdb/README.Debian that contains:
+    
+    > GDB is a complex program.  It comes with an Info manual (`info gdb' or your
+    > favorite other info browser), which serves as a good command reference.
+    >
+    > There are also a number of books and tutorials devoted to GDB.  One
+    > particularly useful guide is Peter Jay Salzman's, at:
+    >   http://www.dirac.org/linux/gdb/
+    
+    I nearly fainted when I saw that, since the person who wrote this is probably [Daniel Jacobowitz](http://www.gnu.org/software/gdb/committee), who is a lead developer of GDB and a member of the GDB steering committee. Quite an honor!
+
+If you link to my pages or use these pages for training material, please let me know so I can put you and a link to your work up in this section (or simply describe it), which I'm officially calling my "[ego page](#kudos)".  :)
 
 # Chapter 1: Introduction
 ## What Is A Debugger?
@@ -72,41 +90,41 @@ Most people use the `printf()` debugging method. This is called adding "trace co
 There are a few reasons why this may not be the best way of doing things:
 
 * Sometimes you need a lot of `printf()`'s, and it can get tedious putting them in and taking them out. Inserting and deleting superfluous code all the time is really distracting. It draws attention away from what you're doing. It's like trying to implement a linked list while someone is talking to you about last night's Futurama episode.
-* A symbolic debugger can do an awful lot that `printf()` can't. You can do just about anything you can think of, including changing the value of variables at run-time, halt the program temporarily, list source code, printo the datatype of a variable or struct that you don't recognize, jump to an arbitrary line of code, and much, much more.
+* A symbolic debugger can do an awful lot that `printf()` can't. You can do just about anything you can think of, including changing the value of variables at run-time, halt the program temporarily, list source code, print the datatype of a variable or struct that you don't recognize, jump to an arbitrary line of code, and much, much more.
 * You can use a symbolic debugger on a running process; you don't even have to kill the process! Try that with `printf()`!
 * You can use a symbolic debugger on a process that has already crashed and died without having to re-run the program. You'll see the state the program was in at the time of death and can inspect all the variables.
 * A knowledge of GDB will increase your knowledge of programs, processes, memory and your language of choice.
 
-You'll be able to find and fix your bugs faster using a symbolic debugger like GDB. However, this isn't to say that `printf()` has no use in debugging. Sometimes it's the best way to go. However, for real code, a debugger can almost always get the job done orders of magnitude faster and easier. And using a debugger is always more elegant, and if you don't care about elegance, you should quit programming on Linux and start using Visual C++.
+You'll be able to find and fix your bugs faster using a symbolic debugger like GDB. However, this isn't to say that `printf()` has no use in debugging. Sometimes it's the best way to go. However, for real code, a debugger can almost always get the job done orders of magnitude faster and easier. And using a debugger is *always* more elegant, and if you don't care about elegance, you should quit programming on Linux and start using Visual C++.
 
 ## What Is GDB?
 In the previous section I told you what a symbolic debugger is. There are actually MANY symbolic debuggers, and in the next section I'll mention some of them. However, this tutorial is about one particular debugger which I use, called GDB.
 
-GDB is a debugger which is part of the Free Software Foundation's GNU operating system. Its original author is Richard M. Stallman (affectionately known as "RMS", one of the finest heroes of the free software movement), and has a long and impressive list of contributors, including some interesting corporate sponsorship for support under various architectures. It's a wonderful piece of software and outclasses nearly every other debugger I've seen, including commercial ones.
+GDB is a debugger which is part of the [Free Software Foundation's](http://www.gnu.org) GNU operating system. Its original author is Richard M. Stallman (affectionately known as "[RMS](http://www.stallman.org)", one of the finest heroes of the free software movement), and has a long and impressive list of [contributors](http://sources.redhat.com/gdb/download/onlinedocs/gdb_1.html#SEC4), including some interesting corporate sponsorship for support under various architectures. It's a wonderful piece of software and outclasses nearly every other debugger I've seen, including commercial ones.
 
 GDB can be used to debug C, C++, Objective-C, Fortran, Java and Assembly programs. There's partial support for Modula-2 and Pascal. It'll run on any architecture you can think of that supports Unix, so learning GDB on your home PC will give you the power to debug code anywhere Unix can run!
 
 Way back when, dbx was the canonical debugger people used on Unix systems. With the advent of GNU being the standard by which all Unix systems are measured, GDB became the canonical debugger of the debugging world. As a result, even commercial debuggers have a tendency to be command compatible (or even idea compatible) with GDB, so learning GDB will enable you to use a whole slew of other debuggers. In short, if you learn GDB, you will be able to debug anything almost anywhere with any debugger in the Unix world.
 
-GDB's homepage is located at www.gnu.org/software/gdb/gdb.htmland as of Nov 2006, is up to version 6.4.
+GDB's homepage is located at [www.gnu.org/software/gdb/gdb.html](http://www.gnu.org/software/gdb/gdb.html) and as of Nov 2006, is up to version 6.4.
 
-GDB is copyleft software (meaning that not only is GDB free software, but all publicly released derivatives and enhancements people make to GDB must also be free) and is licensed under the GNU GPL
+GDB is [copyleft](http://www.gnu.org/licenses/licenses.html#WhatIsCopyleft) software (meaning that not only is GDB free software, but all publicly released derivatives and enhancements people make to GDB must also be free) and is licensed under the GNU [GPL](http://opensource.org/licenses/gpl-license.php).
 
 ## Other Symbolic Debuggers
-This section documents other debuggers, both actively developed and long gone. I give a short history when the information is available. Any additions (history, debuggers not listed here, other front ends, screenshots), please let me know.
+This section documents other debuggers, both actively developed and long gone. I give a short history when the information is available. Any additions (history, debuggers not listed here, other front ends, screenshots), please [let me know](mailto:p@dirac.org).
 
 ### Debuggers
-* The first debugger that I know of was called dbx, and like GDB, was command line driven. The text UI of GDB was written to resemble dbx, although the two debuggers are not command line compatible. Other symbolic debuggers were written so that their UI resembled dbx (or GDB) as well. For this reason, you'll find many command line debuggers to be quite similar. If you learn to use GDB, you'll largely be able to navigate through most other debuggers.
-* ups is another debugger originally developed by Mark Russell but is now updated by Rod Armstrong. It also comes with its own theme song. Ups includes a C interpreter which allows you to add fragments of code simply by editing them into the source window (the source file itself is not modified). Perversely, this lets you add debugging `printf()` calls without recompiling, relinking or even restarting the target program. ups supports C, C++ and limited FORTRAN debugging on SunOS, Solaris, Linux and FreeBSD.
-* The Portland Group sells an excellent high-quality GUI debugger named pgdbg. pgdbg specializes in debugging all kinds of parallel code on many different kinds of clusters (distributed memory, SMP servers, etc). While pgdb is a very high-powered debugger, it's also expensive.
+* The first debugger that I know of was called dbx, and like GDB, was command line driven. The text UI of GDB was written to resemble dbx, although the two debuggers [are not command line compatible](http://www.dartmouth.edu/~rc/classes/soft_dev/gdb_and_dbx.html). Other symbolic debuggers were written so that their UI resembled dbx (or GDB) as well. For this reason, you'll find many command line debuggers to be quite similar. If you learn to use GDB, you'll largely be able to navigate through most other debuggers.
+* [ups](http://ups.sourceforge.net) is another debugger originally developed by Mark Russell but is now updated by Rod Armstrong. It also comes with its own [theme song](ftp://ftp.x.org/R5contrib/ups-song.au). Ups includes a C interpreter which allows you to add fragments of code simply by editing them into the source window (the source file itself is not modified). Perversely, this lets you add debugging `printf()` calls without recompiling, relinking or even restarting the target program. ups supports C, C++ and limited FORTRAN debugging on SunOS, Solaris, Linux and FreeBSD.
+* The [Portland Group](http://www.pgroup.com) sells an excellent high-quality GUI debugger named [pgdbg](http://www.pgroup.com/tools/pgdbg.htm). pgdbg specializes in debugging all kinds of parallel code on many different kinds of clusters (distributed memory, SMP servers, etc). While pgdb is a very high-powered debugger, it's also expensive.
 
 ### Front Ends
 * xwpe.
-* The most popular GDB front end is DDD, the Data Display Debugger which uses the Motif widget set. DDD has some nice features: it can give you graphical representations of linked lists, ADT's and trees. In addition, DDD is a front end to the Python, Java and Perl debuggers as well. I personally don't use DDD much, but I still appreciate it. DDD used to be quite buggy. Over the years it has stopped crashing regularly(!) on me, but as of March 2003, still crashes on a blue moon. In addition, the pop-up command tool definitely has "issues" with window managers that have multiple screens, like Enlightenment.
+* The most popular GDB front end is DDD, the [Data Display Debugger](http://www.gnu.org/software/ddd) which uses the Motif widget set. DDD has some nice features: it can give you graphical representations of linked lists, ADT's and trees. In addition, DDD is a front end to the Python, Java and Perl debuggers as well. I personally don't use DDD much, but I still appreciate it. DDD used to be quite buggy. Over the years it has stopped crashing regularly(!) on me, but as of March 2003, still crashes on a blue moon. In addition, the pop-up command tool definitely has "issues" with window managers that have multiple screens, like Enlightenment.
 * tgdb is a Tcl/Tk front end for GDB first written in 1994 by a company named HighTec EDV-Systeme GmbH, in Germany. It was shareware (asking price was $30). Development and support seems to have ended many years ago. It shouldn't be confused with "trivial gdb" which is also called tgdb.
 * xdbx is a front end to dbx that was created by Po Cheung of Microelectronics and Computer Technology Corporation (MCC) in March 10, 1989. It uses the old X Athena widget set (libxaw). It has its own license which is open source but not copyleft. Development died a long, long time ago.
 * xxgdb is a front end to GDB that was created in December 1990 by Pierre Willard. It has its own license which is open source but not copyleft. It's built from the source code for xdbx; basically, xxgdb is xdbx adapted to GDB instead of dbx. xxgdb uses the old X Athena widget set (libxaw). It currently doesn't run on any system that uses unix98 posix TTYs. Development died in 2002. It most likely doesn't work with current versions of GDB.
-* mxgdb is a Motif based front end for GDB written by Jim Tsillas back in January 3 1992. mxgdb is based on xxgdb: Jim ported xxgdb from the Athena widget set to the Motif widget set (in turn, xxgdb was a GDB port of xdbx). It's licensed under the GNU GPL and was last maintained (I think) by Robert Stockmann. It most likely doesn't work with current GDB versions.
+* [mxgdb](http://www.boutell.com/lsm/lsmbyid.cgi/001337) is a Motif based front end for GDB written by Jim Tsillas back in January 3 1992. mxgdb is based on xxgdb: Jim ported xxgdb from the Athena widget set to the Motif widget set (in turn, xxgdb was a GDB port of xdbx). It's licensed under the GNU GPL and was last maintained (I think) by Robert Stockmann. It most likely doesn't work with current GDB versions.
 
 # Chapter 2: Memory Layout and the Stack
 ## Where Are We Going To Go?
@@ -138,7 +156,7 @@ It used to be the case that Linux could only be ported to architectures that had
 
 #### Exercises
 
-* Read a short Wikipedia blurb on the MMU
+* Read a short Wikipedia blurb on the [MMU](http://en.wikipedia.org/wiki/Memory_management_unit)
 * Optional: If you want to know more about VM, here's a [link](https://en.wikipedia.org/wiki/Virtual_memory). This is much more than you need to know.
 
 ## Memory Layout
@@ -160,7 +178,7 @@ That's how VM works. For the most part, each process's VM space is laid out in a
 * The stack: The stack is a collection of stack frames which will be described in the next section. When a new frame needs to be added (as a result of a newly called function), the stack grows downward.
 * The heap: Most dynamic memory, whether requested via C's malloc() and friends or C++'s new is doled out to the program from the heap. The C library also gets dynamic memory for its own personal workspace from the heap as well. As more memory is requested "on the fly", the heap grows upward.
 
-Given an object file or an executable, you can determine the size of each section (realize we're not talking about memory layout; we're talking about a disk file that will eventually be resident in memory). Given , Makefile:
+Given an object file or an executable, you can determine the size of each section (realize we're not talking about memory layout; we're talking about a disk file that will eventually be resident in memory). Given [Makefile](https://www.dirac.org/linux/gdb/code/02/hello_world-1/Makefile):
 ```C
 1   // hello_world-1.c
 2
@@ -213,10 +231,10 @@ You can also get the size of the sections of the object file using "objdump -h" 
 * The size command didn't list a stack or heap segment for hello_world or hello_world.o. Why do you think that is?
 * There are no global variables in hello_world-1.c. Give an explanation for why size reports that the data and bss segments have zero length for the object file but non-zero length for the executable.
 * size and objdump report different sizes for the text segment. Can you guess where the discrepancy comes from? Hint: How big is the discrepancy? See anything of that length in the source code?
-* Optional: Read [this](https://en.wikipedia.org/wiki/Object_file) link about object file formats.
+* Optional: Read [this](https://en.wikipedia.org/wiki/Object_file_format) link about object file formats.
 
 ## Stack Frames And The Stack
-You just learned about the memory layout for a process. One section of this memory layout is called the stack, which is a collection of stack frames. Each stack frame represents a function call. As functions are called, the number of stack frames increases, and the stack grows. Conversely, as functions return to their caller, the number of stack frames decreases, and the stack shrinks. In this section, we learn what a stack frame is. A very detailed explanation, but we'll go over what's important for our purposes.
+You just learned about the memory layout for a process. One section of this memory layout is called the *stack*, which is a collection of *stack frames*. Each stack frame represents a function call. As functions are called, the number of stack frames increases, and the stack grows. Conversely, as functions return to their caller, the number of stack frames decreases, and the stack shrinks. In this section, we learn what a stack frame is. [A very detailed explanation](http://en.wikipedia.org/wiki/Call_stack), but we'll go over what's important for our purposes.
 
 A program is made up of one or more functions which interact by calling each other. Every time a function is called, an area of memory is set aside, called a stack frame, for the new function call. This area of memory holds some crucial information, like:
 
@@ -546,9 +564,9 @@ How to debug with your brain.
 Why knowing theory, like the memory layout of a program, can be helpful when debugging.
 
 ## Debugging With Your Brain
-In the last section we looked at how a program is laid out in memory. Knowing this is not only useful for debugging with GDB, but it's also useful for debugging without GDB. In this interlude, guest written by my close friend, Mark Kim, we'll see how.
+In the last section we looked at how a program is laid out in memory. Knowing this is not only useful for debugging with GDB, but it's also useful for debugging without GDB. In this interlude, guest written by my close friend, [Mark Kim](http://cbreak.org), we'll see how.
 
-Compile and run spinning_cube.tar.bz2. A spinning cube is displayed with images of Geordi (white) and Juliette (calico), me on a New York City subway, and where I work.
+Compile and run [spinning_cube.tar.bz2](https://www.dirac.org/linux/gdb/code/02/spinning_cube.tar.bz2). A spinning cube is displayed with images of Geordi (white) and Juliette (calico), me on a New York City subway, and where I work.
 
 However, when you press a key, some of the cube's textures mysteriously vanish. My first instinct was to use GDB to find the problem, but I discovered that SDL programs that use OpenGL can't be debugged via GDB. Upon investigation, I found that when you pass the flag SDL_OPENGL to the function SDL_SetVideoMode(), a SIGFPE is generated which terminates the program. If you try to handle the SIGFPE, you'll find that SDL_SetVideoMode() never returns, so GDB is left in a hung state.
 
@@ -556,9 +574,10 @@ I had just spent over 40 hours programming over the last 3 days and was getting 
 
 Before continuing you'll want to:
 
-Run the program to see the bug in action. You need OpenGL and SDL to compile the program.
-Look at HandleKeyPress() in input.c, which handles keystrokes.
-Look at Debug(), in yerror.h, which is called from HandleKeyPress().
+1. Run the program to see the bug in action. You need OpenGL and SDL to compile the program.
+2. Look at HandleKeyPress() in **input.c**, which handles keystrokes.
+3. Look at Debug(), in **yerror.h**, which is called from HandleKeyPress().
+
 Spend 10 minutes trying to fix the bug. This will make Mark's email all the more impressive. As you read Mark's email, pay particular attention to steps 6, 7B, and 7C for particular examples of sheer debugging brilliance!
 ```
    Hey Peter,
@@ -653,8 +672,8 @@ Spend 10 minutes trying to fix the bug. This will make Mark's email all the more
 ``` 
 
 # Chapter 3: Initialization, Listing And Running
-Where Are We Now?
-In the last chapter we learned about an executing process's memory layout which is divided into segments. One important segment is the call stack (or stack), which is a collection of stack frames (or frames). There is one frame for each function call, and the frame holds three important things:
+## Where Are We Now?
+In the last chapter we learned about an executing process's memory layout which is divided into segments. One important segment is the *call stack* (or *stack*), which is a collection of *stack frames* (or *frames*). There is one frame for each function call, and the frame holds three important things:
 
 1. The local variables for the function.
 1. The current address pointer within the function.
@@ -666,12 +685,11 @@ Executables don't contain references to object (function and variable) names or 
 
 Lastly, we briefly learned how to make GDB pause execution using the break command and execute one line of source code using the step command. We'll have much more to say about these commands shortly.
 
-# Chapter 4: Breakpoints and Watchpoints
 ## Where Are We Going To Go?
-In this chapter, we'll investigate the list command which (surprisingly) lists lines of source code. We'll take an in-depth look at GDB's initialization file .gdbinit. Lastly, we'll look at GDB's run command which executes a program from within GDB.
+In this chapter, we'll investigate the list command which (surprisingly) lists lines of source code. We'll take an in-depth look at GDB's initialization file **.gdbinit**. Lastly, we'll look at GDB's run command which executes a program from within GDB.
 
 ## Basic Listing of Source Code
-Download derivative, a program that calculates numerical derivatives, to follow along with the discussion: derivative.tar.bz2. Take a moment to familiarize yourself with the code. Note the use of groovy function pointers.
+Download **derivative**, a program that calculates numerical derivatives, to follow along with the discussion: [derivative.tar.bz2](https://www.dirac.org/linux/gdb/code/03/derivative/broken/derivative.tar.bz2). Take a moment to familiarize yourself with the code. Note the use of groovy function pointers.
 
 You can list source code with GDB's list command, abbreviated by l. Run GDB on the executable and use the list command:
 ```
@@ -859,7 +877,7 @@ You can comment your .gdbinit files with bash's "#". And blank lines, of course,
 ### Exercises
 * When you invoke GDB, it prints a copyright notice. Using GDB's man page, figure out how to prevent GDB from printing this notice. Using your shell's alias feature, make an alias for "gdb" that invokes GDB, but surpresses the copyright notice. I use this alias myself.
 * Figure out how to reset GDB's prompt from (gdb) to something that tickles your fancy. Google would be a great way of figuring this out. GDB's help utility would also be useful (hint: you want to "set" the prompt to something else). Modify .gdbinit so that GDB uses your chosen prompt on startup.
-* You can even use terminal escape codes to put color in your GDB prompt! If you don't know about terminal color escape codes, you can read about them here. One caveat: You have to use the octal code `\033` for the escape character. So for example, bold blue would be `\033[01;34m`. And then don't forget to turn the blue off, otherwise everything will be blue. I'll let you figure out how to do that yourself! Thanks to Jeff Terrell for pointing this out to me!
+* You can even use terminal escape codes to put color in your GDB prompt! If you don't know about terminal color escape codes, you can read about them [here](http://www-106.ibm.com/developerworks/library/l-tip-prompt). One caveat: You have to use the octal code `\033` for the escape character. So for example, bold blue would be `\033[01;34m`. And then don't forget to turn the blue off, otherwise everything will be blue. I'll let you figure out how to do that yourself! Thanks to Jeff Terrell for pointing this out to me!
 
 ### A Caveat for Colored GDB Prompts
 *Thanks Eric Rannaud*
@@ -885,7 +903,7 @@ The environment variable `HOME`, used by `.gdbinit`, is not normally defined in 
 Windows Explorer will not accept (create) a file named `.gdbinit` but Windows itself has no problem with it. Create a file named something like: `gdb.init` in your `%HOME%` directory, then go to command-line and type `move gdb.init .gdbinit`. This will create the file and Explorer will now work with it. You might want to copy this (empty) file to your intended working directory(ies) before you edit in your commands for the HOME file.
 
 ## Running A Program In GDB
-Let's properly introduce the run command. Download and compile arguments.tar.bz2.
+Let's properly introduce the run command. Download and compile [arguments.tar.bz2](https://www.dirac.org/linux/gdb/code/03/arguments/arguments.tar.bz2).
 
 The run command with no arguments runs your program without command line arguments. If you want to give the program arguments, use the run command with whatever arguments you want to pass to the program:
 ```
@@ -947,8 +965,8 @@ The last two options will leave everything intact: breakpoints, watchpoints, com
 
 You might be wondering why there's a kill command when you can either quit GDB with quit or re-run the program with run. The `kill` command seems kind of superfluous. There are some reasons why you'd use this command, and you can read about them [here](https://ftp.gnu.org/old-gnu/Manuals/gdb/html_node/gdb_23.html). Thanks to Suresh Babu for pointing out that the `kill` command may also be useful when you are remote debugging or if a process is debugged via the attach command. That said, I've never used `kill` myself.
 
-## Breakpoints and Watchpoints
-So far you know how to list source code and run a program from within gdb. But you already knew how to do that without gdb. What else does gdb give us? To do anything really useful with gdb, you need to set breakpoints which temporarily pause your program's execution so you can do useful debugging work like inspecting variables and watching the program's execution in an atomic line-by-line fashion. This right here is the magic of a symbolic debugger.
+# Chapter 4: Breakpoints And Watchpoints
+So far you know how to list source code and run a program from within gdb. But you already knew how to do that *without* gdb. What else does gdb give us? To do anything really useful with gdb, you need to set breakpoints which temporarily pause your program's execution so you can do useful debugging work like inspecting variables and watching the program's execution in an atomic line-by-line fashion. This right here is the magic of a symbolic debugger.
 
 Breakpoints come in three flavors:
 
@@ -961,15 +979,17 @@ A breakpoint stops your program whenever a particular place in the program is re
 *Mr. Computer, won't you please stop when...*
 * *you reach line 420 of the current source code file?*
 * *you enter the function validateInput()?*
-* *you reach line 2718 of the file video.c?*
+* *you reach line 2718 of the file **video.c**?*
 
 All those requests have one thing in common: they ask gdb to stop based on reaching some location within the program. That's what a breakpoint does. There are two things I'd like to mention before we start:
 
-**What does "stopping at line 5" mean?**
-When gdb stops at "line 5", this means that gdb is currently waiting "between" lines 4 and 5. Line 5 hasn't executed yet. Keep this in mind! You can execute line 5 with the next command, but line 5 has not happened yet.
+1. **What does "stopping at line 5" mean?**
+   
+   When gdb stops at "line 5", this means that gdb is currently waiting "between" lines 4 and 5. Line 5 hasn't executed yet. Keep this in mind! You can execute line 5 with the next command, but line 5 has not happened yet.
 
-**Why did gdb stop here?**
-Sometimes you may be surprised at where gdb stops. You may have specified a breakpoint at line 5 of the source code, but gdb could stop at line 7, for instance. This can happen for 2 reasons. First, if you compile a program with optimization set, some lines of source code may be optimized out of existence; they exist in your source code, but not in the executable. Secondly, not every line of source code gets compiled into machine code instruction. Consider the code below:
+2. **Why did gdb stop here?**
+   
+   Sometimes you may be surprised at where gdb stops. You may have specified a breakpoint at line 5 of the source code, but gdb could stop at line 7, for instance. This can happen for 2 reasons. First, if you compile a program with optimization set, some lines of source code may be optimized out of existence; they exist in your source code, but not in the executable. Secondly, not every line of source code gets compiled into machine code instruction. Consider the code below:
 ```
 1   #include <stdio.h>
 2      
@@ -979,42 +999,1093 @@ Sometimes you may be surprised at where gdb stops. You may have specified a brea
 6        i = 3;
 7   
 8        return 0;
-9   }
+9   }  
 ```
-Inserting a breakpoint at line X makes your program pause at line Y...
-| Unoptimized code   |                        | Optimized code         |                        |
-|:-------------------|------------------------|:-----------------------|------------------------|
-| Breakpoint at line | Program pauses at line | Breakpoint set at line | Program pauses at line |
-| 1--4, main()       | 4                      | 1--4, main()           | 4                      |
-| 5, 6               | 6                      | 5--9	               | 9                      |
-| 7, 8               | 8                      |                        |                        |
-| 9                  | 9                      |                        |                        |
-Each breakpoint, watchpoint, and catchpoint you set is assigned a number starting with 1. You use this number to refer to that breakpoint. To see the list of all breakpoints and watchpoints you've set, type info breakpoints (which can be abbreviated by i b. I show a sample resulting output:
+   Inserting a breakpoint at line X makes your program pause at line Y...
+
+   | Unoptimized code   |                        | Optimized code         |                        |
+   |:-------------------|------------------------|:-----------------------|------------------------|
+   | Breakpoint at line | Program pauses at line | Breakpoint set at line | Program pauses at line |
+   | 1--4, main()       | 4                      | 1--4, main()           | 4                      |
+   | 5, 6               | 6                      | 5--9                   | 9                      |
+   | 7, 8               | 8                      |                        |                        |
+   | 9                  | 9                      |                        |                        |
+
+Each breakpoint, watchpoint, and catchpoint you set is assigned a number starting with 1. You use this number to refer to that breakpoint. To see the list of all breakpoints and watchpoints you've set, type info breakpoints (which can be abbreviated by `i b`). I show a sample resulting output:
 ```
-	(gdb) info breakpoints 
-	Num Type           Disp Enb Address    What
-	1   breakpoint     keep y   0x080483f6 in main at try5.c:4
-			  breakpoint already hit 1 time
-	2   breakpoint     keep n   0x0804841a in display at try5.c:14
-			  breakpoint already hit 1 time
-	3   hw watchpoint  keep y   i
+   (gdb) info breakpoints 
+   Num Type           Disp Enb Address    What
+   1   breakpoint     keep y   0x080483f6 in main at try5.c:4
+                       breakpoint already hit 1 time
+   2   breakpoint     keep n   0x0804841a in display at try5.c:14
+                       breakpoint already hit 1 time
+   3   hw watchpoint  keep y   i
 ```
 According to the output, there are two breakpoints, one at line 4 and the other at line 14 of the source code. They are assigned to numbers 1 and 2 respectively. There is also a watchpoint set: the program will halt whenever the variable i (local to display()) changes value.
 
-In addition to being assigned a number, each breakpoint and watchpoint can be enabled or disabled. A program's execution won't stop at a disabled breakpoint or watchpoint. By default, when you create a new breakpoint or watchpoint, it's enabled. To disable the breakpoint or watchpoint assigned to number n, type:
+In addition to being assigned a number, each breakpoint and watchpoint can be *enabled* or *disabled*. A program's execution won't stop at a disabled breakpoint or watchpoint. By default, when you create a new breakpoint or watchpoint, it's enabled. To disable the breakpoint or watchpoint assigned to number n, type:
 ```
-	disable n
+   disable n
 ```
 To re-enable this breakpoint or watchpoint, type:
 ```
-	enable n
+   enable n
 ```
 If you look at the sample output of info breakpoints above, you'll see that breakpoint 2 has been disabled.
 
+## Breaking
+Compile and run the **fgets** program, which is a multi-filed program (the files are [fgets.c](https://www.dirac.org/linux/gdb/code/fgets/fgets.c), [fgets.h](https://www.dirac.org/linux/gdb/code/fgets/fgets.h), and [main.c](https://www.dirac.org/linux/gdb/code/fgets/main.c)):
+```
+   $ gcc -c -g -W -Wall fgets.c main.c
+   $ gcc -o fgets fgets.o main.o
+```
+Note that the compiler generated a warning. That's because we used -W -Wall which instructs gcc to tell us when it sees what it thinks might be a common programming error. The best way to debug your program is to not put the bugs in the program to begin with. You should *always* use these gcc bug finding options. Let me be blunt here, and I hope I don't offend anyone. It's stupid not to use -W -Wall when you compile code. Plain and simple. Stupid. With a capital S. Most people don't use them, even people who are clearly better programmers than me. That's because even smart people can do dumb things. Don't you be dumb. Always use -W -Wall.
+
+The program is a password guessing program. Take a moment to look through the code to see how it works. The program is ultra-simple so we can focus on learning GDB rather than trying to figure out complicated code like linked lists and whatnot. You should be able to deduce how the program works (and what the password is) in under a few seconds. Now run the code and notice it simply doesn't work. We'll first concentrate on learning how to set breakpoints, and then we'll debug the program.
+
+### Setting Basic Breakpoints
+There are four major ways to set a breakpoint, in roughly the order that I personally use them:
+
+1. By function name.
+2. By line number.
+3. By filename and line number.
+4. By address.
+
+#### By Function Name
+We've already seen the most common way of setting a breakpoint: with the function name.
+```
+   $ gdb fgets
+   Using host libthread_db library "/lib/tls/libthread_db.so.1".
+   (gdb) break main
+   Breakpoint 1 at 0x8048464: file main.c, line 6.
+   (gdb)
+```
+The "break main" command sets a breakpoint at the top of main(), which happens to be line 6 of **main.c**. If we now run the program, the program will stop at line 6. Recall from the previous discussion that this means that GDB will be sitting between lines 5 and 6. Line 6 will *not* have executed until we issue the step command:
+```
+   (gdb) run
+   Starting program: code/fgets/fgets 
+
+   Breakpoint 1, main () at main.c:6
+   6               char *word = "password";
+   (gdb) 
+```
+
+#### By Line Number
+A second way of setting breakpoints is with a line number. The line number refers to the file GDB is currently in. Right now, we're in **main.c**, so line numbers are with respect to that file for now. Let's set a breakpoint at line 9, where the printf() statement is.
+```
+   (gdb) break 9
+   Breakpoint 2 at 0x804846b: file main.c, line 9.
+   (gdb)
+```
+GDB has a continue command which we haven't seen yet. Once GDB pauses due to a breakpoint, the continue command will resume execution. Use continue to make sure that GDB pauses at line 9:
+```
+   (gdb) continue
+   Continuing.
+
+   Breakpoint 2, main () at main.c:9
+   9               printf("I'm thinking of a word.  Let's see if you can guess it.\n");
+   (gdb) 
+```
+
+#### By Filename And Line Number
+A third way of setting breakpoints is with a filename and line number, separated with a colon. Let's set a breakpoint at line 10 of **fgets.c**:
+```
+   (gdb) break fgets.c:10
+   Breakpoint 3 at 0x80483fd: file fgets.c, line 10.
+   (gdb)
+```
+
+#### By Address
+A fourth way of setting breakpoints is with a memory address within the process's VM space. I'll find the address of TakeGuess() and set a breakpoint at that address:
+```
+   (gdb) print TakeGuess 
+   $1 = {int (const char *)} 0x80483f4 <TakeGuess>
+   (gdb) break *0x80483f4
+   Breakpoint 4 at 0x80483f4: file fgets.c, line 7.
+```
+
+### Breakpoint Numbers
+You might have noticed that each breakpoint is given an integer identifier. For example, we've set 4 breakpoints already, and the last one we set (by address) was assigned the number 4. If you haven't noticed this, go back and take a look. Various operations can be performed on a breakpoint, like removing them. You can perform an operation on a particular breakpoint by referring to its integer identifier.
+
+### Removing Breakpoints
+Just as you can set breakpoints, you can also remove them. There are numerous ways to remove a breakpoint:
+
+* If you want to remove the breakpoint by its location, use clear.
+* If you want to remove the breakpoint by its identifier, use delete.
+
+So let's use clear to remove the four breakpoints the way we set them; kind of like "undoing" what we did:
+```
+   (gdb) clear *0x80483f4
+   Deleted breakpoint 4 
+   (gdb) clear fgets.c:10
+   Deleted breakpoint 3 
+   (gdb) clear 9
+   Deleted breakpoint 2 
+   (gdb) clear main
+   Deleted breakpoint 1 
+   (gdb)
+```
+The delete command deletes breakpoints by identifier, as opposed to clear which removes breakpoints based on their location. In fact, `delete n` deletes the breakpoint with identifier n. We investigate this command more fully in the exercises.
+
+#### Exercises
+1. If you've been following along with the tutorial, you shouldn't have any breakpoints set since we deleted them all with clear. Set three breakpoints wherever you like by the methods of your choice. Before you do, guess what their identifiers will be.
+2. Use delete, not clear, to remove only the last breakpoint you set. This will leave you with two remaining breakpoints.
+3. You should have two breakpoints left. `delete` with no arguments removes *all* breakpoints. Try it out, then quit GDB.
+
+### Enabling, Disabling, And Ignoring
+Once set, there are only two ways to get rid of a breakpoint: remove it or quit GDB. GDB will continually break at the breakpoint. However, you'll sometimes find it useful to temporarily disable a breakpoint, that is, you do *not* want GDB to break at the breakpoint, but you want to keep the breakpoint there in case you need to debug that section of code again.
+
+Breakpoints can be enabled and disabled. Simply put, your program will pause at an enabled breakpoint, but it will not pause at a disabled breakpoint.
+
+You can enable or disable breakpoints using the enable and disable commands which take an argument of the breakpoint identifier for the breakpoint you want to enable or disable. Let's take a look at this using the **fgets** program that we previously used. Start a debugging session of **fgets** and place breakpoints at lines 6, 9, and 12 of **main.c**:
+```
+   $ gdb fgets
+   (gdb) break 6
+   Breakpoint 1 at 0x8048464: file main.c, line 6.
+   (gdb) break 9
+   Breakpoint 2 at 0x804846b: file main.c, line 9.
+   (gdb) break 12
+   Breakpoint 3 at 0x8048477: file main.c, line 12.
+```
+Disable breakpoint 2, run the program, and use continue to verify that breakpoint 2 does not pause execution.
+```
+   (gdb) disable 2
+   (gdb) run
+   Starting program: code/fgets/fgets 
+
+   Breakpoint 1, main () at main.c:6
+   6               char *word = "password";
+   (gdb) continue 
+   Continuing.
+   I'm thinking of a word.  Let's see if you can guess it.
+
+   Breakpoint 3, main () at main.c:12
+   12              while ( KeepGoing )
+```
+Confirmed, breakpoint 2 is disabled. Finally, enable breakpoint 2 and rerun the program. Use continue to verify that breakpoint 2 now pauses execution:
+```
+   (gdb) enable 2
+   (gdb) run
+   The program being debugged has been started already.
+   Start it from the beginning? (y or n) y
+
+   Starting program: /www/p/linux/gdb/code/fgets/fgets 
+
+   Breakpoint 1, main () at main.c:6
+   6               char *word = "password";
+   (gdb) continue 
+   Continuing.
+
+   Breakpoint 2, main () at main.c:9
+   9               printf("I'm thinking of a word.  Let's see if you can guess it.\n");
+```
+Confirmed, once enabled, breakpoint 2 again pauses execution.
+
+#### Exercises
+1. The disable command permanently disabled a breakpoint until you explicitly enable it with enable. However, it's possible to temporarily disable a breakpoint. Use GDB's help utility to read about the ignore command, which disables a breakpoint "for n crossings".
+2. Personally, I don't use ignore a whole lot. It seems like conditional breaking makes ignore not very useful, but you should still know of its existence. Hopefully you have GDB still open. Use ignore to disable breakpoint 3 (the one at line 12) for 3 crossings. Verify that it works.
+
+### Listing Breakpoints
+So far, we've seen three commands that take a breakpoint's identifier as an argument: delete, enable, and disable. There are many others, which we'll cover later. The point is, breakpoint identifiers are useful, and you'll find yourself using them quite a bit. But how do you remember the identifiers for your breakpoints, or even where your breakpoints were set to begin with? There's a command, info breakpoints which lists all your breakpoints, their identifiers, and lots more information. Hopefully, GDB is still open from the previous subsection, so check it out:
+```
+   (gdb) info breakpoints 
+   Num Type           Disp Enb Address    What
+   1   breakpoint     keep y   0x08048464 in main at main.c:6
+           breakpoint already hit 1 time
+   2   breakpoint     keep y   0x0804846b in main at main.c:9
+           breakpoint already hit 1 time
+   3   breakpoint     keep y   0x08048477 in main at main.c:12
+```
+This is a very important command, and I find myself using it all the time. It should be completely self explanatory except for a couple of things:
+
+1. The **Num** field gives the identifier.
+2. The **Type** field gives the type of breakpoint. There are different types of breakpoints, like hardware watchpoints, which we'll cover shortly.
+3. The **Disp** field (short for disposition) describes what will happen to the breakpoint the next time it's activated (the next time it pauses execution). **keep** indicates nothing will happen to the breakpoint, however, it's possible to disable or even remove a breakpoint the next time it's reached. These situations are identified by the Disp field.
+
 # Chapter 5: Stepping and Resuming
+## Setting Breakpoints In Single File Programs
+There are many ways to set breakpoints. We'll go over each in turn. If you feel up to it, download [try5.c](https://www.dirac.org/linux/gdb/code/05/try5/try5.c) and follow my example. Otherwise, you can simply follow the text (I list try5.c in the previous section). It's better if you do this alongside the tutorial, but since I'm showing gdb's output, it's not necessary. First, compile try5.c for debugging.
+
+```
+   $ gcc -Wall -W -g -o try5 try5.c
+```
+
+The first (and easiest) way you can set a breakpoint is by specifying a linenumber. To break at line 6, simply type break 6. From now on, I'm not going to show the copyright when you first run gdb.
+```
+   $ gdb try5
+   (gdb) break 6
+   Breakpoint 1 at 0x80483f6: file try5.c, line 6.
+```
+
+Wasn't that easy? You can also set breakpoints with a function name:
+```
+   (gdb) break display
+   Breakpoint 2 at 0x804841a: file try5.c, line 15.
+```
+
+Disable the 1st breakpoint, and then look at what you've done:
+```
+   (gdb) disable 1
+   (gdb) info breakpoints 
+   Num Type           Disp Enb Address    What
+   1   breakpoint     keep n   0x080483f6 in main at try5.c:6
+   2   breakpoint     keep y   0x0804841a in display at try5.c:15
+```
+
+Now run the program. Remember, breakpoint 1 is disabled, so it'll stop at line 15.
+```
+   (gdb) run
+   Starting program: /www/p/linux/gdb/try5 
+
+   Breakpoint 2, display (x=3) at try5.c:15
+   15              for (i=0; i<x; ++i) {
+   (gdb)
+```
+
+We've seen 2 ways to set a breakpoint. Now here's a third. To set a breakpoint 2 lines down from the current line, use break +2. Similarly, you can set a breakpoint 3 lines *up* from the current line by break -3. Let's set a breakpoint at line 18 and continue the execution.
+```
+   (gdb) break +3
+   Breakpoint 3 at 0x8048450: file try5.c, line 18.
+   (gdb) continue
+   Continuing.
+   i is 0.
+   i is 1.
+   i is 2.
+
+   Breakpoint 3, display (x=5) at try5.c:18
+   18      }
+   (gdb) 
+```
+
+Go ahead and quit gdb to prepare for the next section.
+
+## Setting Breakpoints In Multiple File Programs
+How do we set breakpoints when a program spans multiple files?
+
+For the form break linenumber, there is an ambiguity when you have a multiple file program. The line number of which file? The answer is that by default, the line number is taken as a line number in whatever file holds main(). That is certainly a reasonable default! But what if we wanted to break on line 5 of a different file? This gives a 4th form for the break command:
+
+```
+   break filename:linenumber
+```
+
+This command will break on line *linenumber* of the source code file named *filename*. For example, break MyFuncs.c:102 will break on line 102 of the source code file MyFuncs.c. There's a 5th form:
+
+```
+   break filename:function
+```
+
+For example, break MyFuncs.c:MyPrintFunction. But unless you're using overloaded function names (you've defined a function multiple times), this is superfluous since you're not allowed (in C) to have 2 definitions belonging to the same function name.
+
+## Advanced Breaking
+If you're trying to debug a program that doesn't have debugging info compiled into the executable, you can't set breakpoints by line number or function name. Instead you have to specify where to break by giving a memory address. This gives us a 6th form:
+
+```
+   break *address
+```
+
+Since I know next to nothing about this, I'll move right along...
+
+The break command without any argument gives a 7th form (only one more to go). It sets a break point at the very next instruction. Look at try5 again (having one eye on the source code will help here).
+```
+    1    $ gdb try5
+    2    (gdb) break display
+    3    Breakpoint 1 at 0x804841a: file try5.c, line 15.
+    4    (gdb) run
+    5    Starting program: /www/p/linux/gdb/try5 
+    6
+    7    Breakpoint 1, display (x=5) at try5.c:15
+    8    15              for (i=0; i<x; ++i) {
+    9    (gdb) next
+   10   16                 printf("i is %d.\n", i);
+   11   (gdb) print i
+   12   $1 = 0
+   13   (gdb) break
+   14   Breakpoint 2 at 0x8048430: file try5.c, line 16.
+   15   (gdb) continue
+   16   Continuing.
+   17   i is 0.
+   18
+   19   Breakpoint 2, display (x=5) at try5.c:16
+   20   16                 printf("i is %d.\n", i);
+   21   (gdb) print i
+   22   $2 = 1
+```
+
+The astute reader will wonder why, on line 22, i has the value of 1 and not 0. We set the breakpoint on line 13 when i had the value of 0. But the very next instruction (which is where we set the breakpoint) was just a printf statement (source code line 16). How in blazes did the printf increment the value of i?
+
+Here's the answer. Once gdb stops at a breakpoint, it will ignore all other breakpoints until one line of instruction has executed. Why does it do this? If this weren't the case, everytime you stopped at a breakpoint, you'd have to disable that breakpoint to resume execution--you wouldn't be able to get past that breakpoint! If this doesn't make sense to you, think about it for awhile. If you still can't get it, don't worry. It's a minor point.
+
+There's one more use for breakpoint form 7, the break command with no arguments. If you change to a higher frame, use break and then continue, the breakpoint will be set at the next instruction after the call to the current frame's function:
+```
+   $ gdb try5
+   (gdb) break display
+   Breakpoint 1 at 0x804841a: file try5.c, line 15.
+   15              for (i=0; i<x; ++i) {
+   (gdb) backtrace
+   #0  display (x=3) at try5.c:15
+   #1  0x8048409 in main () at try5.c:8
+   #2  0x4003e46b in __libc_start_main () from /lib/libc.so.6
+   (gdb) frame 1
+   #1  0x8048409 in main () at try5.c:8
+   8          display(x);
+   (gdb) break
+   Breakpoint 2 at 0x8048409: file try5.c, line 8.
+   (gdb) continue
+   Continuing.
+   i is 0.
+   i is 1.
+   i is 2.
+
+   Breakpoint 2, 0x8048409 in main () at try5.c:8
+   8          display(x);
+   (gdb) 
+```
+
+Can you see what happened here? We stopped at the top of display(), frame 0. We then switched to the frame 1 (main()) and issued the break command. This set a breakpoint at the very next instruction *after* the call to display(). We then continued execution, and the program ran until it hit the very next instruction after display(). In essence, we set the breakpoint so that execution would halt after display() returned. Make sense?
+
+To reiterate, the 7th form of breakpoint is used for loops when you're in the top most frame and returns from functions when you're not in the top most frame. Frankly, I don't find this terribly useful. When in a loop, I think the break +offset or break linenumber is more convenient. For returning from functions, I find the finish command more useful (which you'll learn about shortly).
+
+The 8th and last form of break command is the conditional breakpoint. They are quite useful but little understood. Perhaps part of the reason is that the gdb User Manual does a really poor job explaining them. Here is the form:
+
+```
+   break ... if cond
+```
+
+where ... represents any one of the previous 7 forms of breakpoints we've learned about already and *cond* is any conditional in the language you're using. Here is an example:
+```
+   $ gdb try5
+   (gdb) break 16 if i==2
+   Breakpoint 1 at 0x8048430: file try5.c, line 16.
+   (gdb) r
+   Starting program: /www/p/linux/gdb/try5 
+   i is 0.
+   i is 1.
+
+   Breakpoint 1, display (x=3) at try5.c:16
+   16                 printf("i is %d.\n", i);
+```
+
+We used the 1st form of break with the conditional *i==2*. We could've also used a test for inequality, like *i!=2* or *i>2*. This is mega useful when you're inside of a loop that's going to repeat a million times. The 8th form of break is your friend!
+
+## Summary Of Breakpoints
+
+Form 1:
+```
+   break linenumber
+```
+Set a breakpoint at line number *linenumber*
+
+Form 2:
+```
+   break function
+```
+Set a breakpoint at function *function*.
+
+Form 3:
+```
+   break filename:linenumber
+```
+Set a breakpoint at line *linenum* in source file *filename*.
+
+Form 4:
+```
+   break *address
+```
+Set a breakpoint at address *address*. Use this to set breakpoints in parts of a program that doesn't have debugging information or source files.
+
+## Deleting Breakpoints
+Here are the commands used to delete breakpoints you've set when they've outlived their usefulness.
+
+```
+   clear function
+```
+Clear any breakpoints set at the entry to the function *function*.
+
+```
+   clear filename:function
+```
+Clear any breakpoints set at the entry to the function *function* defined in the source code file *filename*.
+
+```
+   clear linenum
+```
+Clear any breakpoints set at line *linenum* of the current source file. The current source file is the last file whose text was printed.
+
+```
+   clear filename:linenum
+```
+Clear any breakpoints at line *linenum* in file *filename*.
+
+```
+   delete
+```
+Clear all breakpoints.
+
+```
+   delete n
+```
+Each breakpoint is assigned a number starting with 1. This clears breakpoint *n*.
+
+## Inspecting Variables
+Note to Fortran users: All Fortran variables must be in lowercase, regardless of how they were capitalized in your source code. This is because the Fortran standard specifies case independence when it comes to variables. Yes, variable C is variable c in the Fortran standard. There are compilers out there that allow you to use case dependent variables, but this is non-standard, and gcc mandates all lowercase variables. This was done to support legacy code. Sigh.
+
+The whole purpose of setting a breakpoint or watchpoint is to see what's going on with your variables, so let's take a look at inspecting your variables. You can print the data type of a variable using the ptype command. Here are some examples:
+```
+   (gdb) ptype argc
+   type = int
+   (gdb) ptype myfloat
+   type = float
+   (gdb) ptype argv 
+   type = char **
+   (gdb) ptype mystring
+   type = unsigned char *
+   (gdb) pt myIntArray
+   type = int [10]
+```
+
+You can even use ptype to look at structures. Take, for example, the fstat structure defined in sys/stat.h.
+```
+   (gdb) ptype fstat
+   type = struct stat {
+       __dev_t st_dev;
+       short unsigned int __pad1;
+       __ino_t st_ino;
+       __mode_t st_mode;
+       __nlink_t st_nlink;
+       __uid_t st_uid;
+       __gid_t st_gid;
+       __dev_t st_rdev;
+       short unsigned int __pad2;
+       __off_t st_size;
+       long unsigned int st_blksize;
+       __blkcnt_t st_blocks;
+       __time_t st_atime;
+       long unsigned int __unused1;
+       __time_t st_mtime;
+       long unsigned int __unused2;
+       __time_t st_ctime;
+       long unsigned int __unused3;
+       long unsigned int __unused4;
+       long unsigned int __unused5;
+   }
+```
+
+That's quite a structure! You can abbreviate ptype by pt.
+```
+   (gdb) pt mydouble  
+   type = double  
+```
+
+Remember, you can only print the data type of a variable which is defined in the currently selected frame.
+
+Now that you know how to print the data type of your variables, you may want to print their values. Consider the following program (which will be compiled via `gcc -g filename`):
+```c
+1   #include<stdio.h>
+2   #include<string.h>
+3   
+4   int main( int argc, char *argv[] )
+5   {
+6        double mydouble = 3.14 / 3;
+7        float  myfloat  = 3.3;
+8        char   mychar   = 'A';
+9        int    myIntArray[10];
+10       int    MyNegativeInt = -1;
+11       char   myString[20];
+12  
+13       struct foo {
+14            char *name;
+15            int  EyeColour;
+16       } myStruct;
+17  
+18       strncpy(myString, "hello", 19);
+19  
+20       for ( int i = 0; i < 10; i++ )
+21            myIntArray[i] = i;
+22  
+23       return 0;
+24  }
+```
+
+You can view the value of a variable using the print command.
+```
+   (gdb) print i
+   $4 = -1073744780
+```
+
+I stopped the program right before the for loop, so this is what variable i is before it gets initialized. gdb prints the value of the variable which is most 'comfortable' (to borrow fortran 99 lingo) with the datatype. In other words, floats get printed as floats:
+```
+   (gdb) print myfloat
+   $1 = 3.29999995
+```
+
+and doubles get printed as doubles:
+```
+   (gdb) print mydouble
+   $1 = 1.0466666666666666
+```
+
+and chars get printed as chars:
+```
+   (gdb) print mychar
+   $1 = 65 'A'
+```
+
+By the way, you can use the abbreviation p for print:
+```
+   (gdb) p argc
+   $1 = 1
+```
+
+You may be wondering what the numbers preceeded by $ (like $1 or $3) mean. They're kind of like a variable history. Everytime you print any variable, the $n gets incremented by 1. $ by itself refers to the last variable you printed and $n refers to the n'th variable you printed. Look at the following example to see this:
+```
+   (gdb) p mychar
+   $26 = 65 'A'
+   (gdb) p mydouble
+   $27 = 1.0466666666666666
+   (gdb) p $
+   $28 = 1.0466666666666666
+   (gdb) p $27
+   $29 = 1.0466666666666666
+   (gdb) p $26
+   $30 = 65 'A'
+```
+
+You can even typecast a variable when you print it! Here's MyNegativeInt as an int, char and double respectively:
+```
+   (gdb) p MyNegativeInt
+   $41 = -1
+   (gdb) p (char) MyNegativeInt
+   $42 = -1 '\377'
+   (gdb) p (double) MyNegativeInt
+   $43 = -1
+```
+
+The possibilities are endless. But wait, there's more!
+
+## Inspecting Arrays And Structures
+Printing array values is much the same as printing other variables. gdb still uses the concept of being 'comfortable'. In other words, when you print an array, that's exactly what you get! From the code snippet of the previous section:
+```
+   (gdb) p myIntArray
+   $46 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+```
+
+Of course, gdb knows how to access elements of an array:
+```
+   (gdb) pt myIntArray
+   type = int [10]
+   (gdb) pt myIntArray[3]
+   type = int
+   (gdb) p myIntArray[3]
+   $48 = 3
+```
+
+You can do kind of advanced stuff too -- things that you'd expect from only Perl :-). Here's how you print 5 elements of myIntArray, starting at element 3:
+```
+   (gdb) p myIntArray[3]@5
+   $49 = {3, 4, 5, 6, 7}
+```
+
+GDB will not, however, check bounds of the array. Previously we defined myIntArray as an array of 10 ints. Let's see what happens when we try printing 4 ints past the end of the array:
+```
+   (gdb) p myIntArray[3]@11
+   $54 = {3, 4, 5, 6, 7, 8, 9, 10, 1107293224, 1079194419, -1947051841}
+```
+
+Doh! Hopefully, that's not someone's password. :-). You can also print structures:
+```
+   (gdb) p myStruct
+   $2 = {name = 0x40014978 "Miles Davis", EyeColour = 1}
+```
+
+However, this might get out of hand for very large structs. You can set pretty printing of structures by `set print pretty`:
+```
+   (gdb) set print pretty
+   (gdb) p myStruct
+   $4 = {
+     name = 0x40014978 "Miles Davis", 
+     EyeColour = 1
+   }
+   (gdb) 
+```
+
+or, if you only want one of the elements of the structure, you can print it in the way that would seem obvious:
+```
+   (gdb) print myStruct.name
+   $6 = 0x40014978 "Miles Davis"
+```
+
+this works too, but why is a mystery to me:
+```
+   (gdb) print myStruct->name 
+   $15 = 0x40014978 "Miles Davis"
+```
+
+## Advanced Inspection
+You can print things using a format specifier:
+
+```
+   print /FMT variable
+```
+
+Where FMT is:
+
+| FMT | Format |
+|:----|:-------|
+| o   | octal  |
+| x   | hex    |
+| d   | decimal |
+| u   | unsigned decimal |
+| t   | binary |
+| f   | float  |
+| a   | address |
+| c   | char   |
+
+Here's some examples of printing some of our variables using a format specifier:
+```
+   (gdb) p mychar
+   $33 = 65 'A'
+   (gdb) p /o mychar
+   $34 = 0101
+   (gdb) p /x mychar 
+   $35 = 0x41
+   (gdb) p /d mychar 
+   $36 = 65
+   (gdb) p /u mychar 
+   $37 = 65
+   (gdb) p /t mychar 
+   $38 = 1000001
+   (gdb) p /f mychar 
+   $39 = 65
+   (gdb) p /a mychar 
+   $40 = 0x41
+```
+
+By the way, memory addresses in gdb are printed in hex by default. Therefore, `p /a mychar` prints mychar interpreted as an address, the hexidecimal representation of 65. This is very different from the address of mychar!
+
+Speaking of the address of mychar, one would expect that since C loves pointers, gdb would love pointers too. And in fact, it does! Printing the address of mychar is obvious to C programmers (sorry, Fortran users!):
+```
+   (gdb) p &mychar
+   $42 = 0xbffff41b "A33S@\bX\213%\f4?H\023\003@\001"
+```
+
+gdb even knows about the dereference operator. How's this for being perverse?
+```
+   (gdb) p *(&mychar)
+   $43 = 65 'A'
+```
+
+This is the perfect vehicle for teaching students what a pointer is. We're dereferencing the address of mychar. Of course, there's more to this than just coolness (although it's worth it for the coolness factor alone!). I was writing a curses program once and it kept segfaulting on me whenever I tried drawing to a WINDOW object. By looking at the address of a WINDOW that I was passing to a function, I determined that I was passing a WINDOW by value, drawing to a local copy of the WINDOW and returning. Of course, the local copy of the WINDOW wasn't anything initialized by curses so drawing to it was causing a segmentation violation. Looking at the code, it was highly non-obvious what was was going on; it looked just swell! It wasn't until I compared the address of the passed WINDOW with the address of the received WINDOW that I discovered the big oops!
+
+Furthermore, who here is guilty of buffer overruns? Be truthful! It's very easy to fall into the 'off by one' error when you initialize, write to or read from a C array. How many times have you used strcpy when you should've used strncpy? These errors are insidious because they usually don't crash the program, but manifest themselves in wierd behavior in certain rare cases that are hard to track down. Looking at the addresses of what's going on is a sure fire way of finding out the details of what's going on.
+
+## Changing Variables
+There are two ways you can change the value of a variable in gdb. Let's change the value of double myvariable to 10.0. Firstly, you can use the set command:
+
+```
+   set myvariable = 10.0
+```
+
+which is the 'quiet' way. gdb will simply set myvariable to 10 without printing anything. Then there's the 'noisy' way using the print command:
+
+```
+   print myvariable = 10.0
+```
+
+which will set myvariable to 10.0 and then print this new value to the screen. The print command ends up being less keystrokes because you can use the abbreviation p for print.
+
+Remember, you can only change the value of a variable which is defined within the current context. Make sure the variable you want to change is defined in the currently selected frame. If it's not, you need to set the frame before you can change the variable.
+
+## Stepping Through Your Program
+One thing that is good to know is the exact sequence of execution of your program, especially through loops and conditional branches. If the program is not too large, you can follow it easily by executing one line at a time.
+
+There are two commands used to step through your program:
+
+**step**: Execute a single line in the program. If the current statement calls a function, the function is single stepped.
+
+**next**: Execute a single line in the program but treat function calls as a single line. This command is used to skip over function calls.
+
+Since C statements like printf() and scanf() are functions themselves, if you *step* through all your program (as opposed to *next*), you'll find yourself stepping through glibc, the standard C library (which is probably *not* what you want!). Good debugging makes use of next mostly. If you really want to step through a function call, it's best to set a breakpoint there and then you can use next from inside the function.
+
+To execute the next statement, type:
+```
+   step
+```
+
+Each time you type a *step* command, gdb will then list the line that it is about to execute, with the line number on the left, so you can see what's about to happen before it happens.
+
+## Finding Out Where You Are And Listing Source Code
+To find out where you are at any time, type the command:
+```
+   where
+```
+
+This will show you the current line number. For example, a line like this:
+```
+   #0  foo () at foo.f:12
+```
+
+shows that the execution of our program is currently at a location that corresponds to line 12 in the source file, foo.f.
+
+You can display a few lines of your source program around the current location by using the command:
+```
+   list
+```
+
+This will list 10 lines of source roughly centred on your current line number. If you haven't started to debug yet, it will list the first 10 lines of source code. If you type list again, it'll print the next 10 lines of source code. You can also type:
+```
+   list 25
+```
+
+and this will list 10 lines of source code centred on line 25. Typing list again will list the next 10 lines of source code. You can also specify a range of lines to be listed. For example, to list lines 10 through 24 in the current program, you'd type:
+```
+   list 10,24
+```
+
+If there is a function in your program named endpoints(), you can list 10 lines centred on the start of endpoints() by:
+```
+   list endpoints
+```
+
+If you're listing lines and decide you want to see the 10 lines previous to the 10 lines you just displayed:
+```
+   list -
+```
+
+Suppose you set a breakpoint:
+```
+   break 55
+```
+
+and gdb responds with:
+```
+   Breakpoint 1 at 0x8048540: file program3.c, line 55.
+```
+
+You can list the lines centred around that address by specifying the asterisk (for address). It will list the 10 lines centred around the source code line containing that address.
+```
+   list *0x8048540
+```
+
 # Chapter 6: Debugging A Running Process
+## Debugging A Running Process
+So far, we've debugged executables, with and without core files. However, we can debug processes too. Think about that -- we can debug a process that has already been started outside the debugger. There are two ways of doing this: Using command line arguments and using the attach command.
+
+Download and read [beer-process.c](https://www.dirac.org/linux/gdb/code/running_process/beer-process.c) and its Makefile. Compile it, and run it as a background job in one console (or xterm). It'll simply print out the number of bottles of beer on the wall:
+```
+   $ ./beer-process &
+   [1] 17399
+   p@satan$ 100000 bottles of beer on the wall.
+   99999 bottles of beer on the wall.
+   99998 bottles of beer on the wall.
+   99997 bottles of beer on the wall.
+```
+
+## With Command Line Arguments
+With the beer process running one console, start GDB in another console with an argument list of the executable and the process ID. The process ID should've been printed when you started the background process:
+```
+   $ gdb beer-process 17399
+   Attaching to program: code/running_process/beer-process, process 17399
+   0x410c64fb in nanosleep () from /lib/tls/libc.so.6
+   (gdb) 
+```
+
+Chances are overwhelmingly good that the process is in GoToSleep(). Print out a backtrace and take a look at the stack:
+```
+   (gdb) bt
+   #0  0x410c64fb in nanosleep () from /lib/tls/libc.so.6
+   #1  0x410c6358 in sleep () from /lib/tls/libc.so.6
+   #2  0x0804841f in GoToSleep () at beer-process.c:32
+   #3  0x080483e0 in main () at beer-process.c:14
+```
+
+*Aside:* Note that GoToSleep() calls the C library function sleep(), and sleep(), in turn, calls the system call nanosleep(). As you know, all library functions (glibc on Linux) do their job by calling system calls. I'm a little surprised to see the library and system functions listed in the call stack since I'm not using a debugging version of glibc. Weird.
+
+At this point, the backtrace should be very familiar to you. But there's an important distinction. We didn't run this program from within GDB. We ran it from the command line, and then had GDB attach to an already running process.
+
+Look at the output of the beer process: you should notice that the process has stopped! Whenever GDB attaches to a running process, the process is paused so you can get a handle on what the call stack looks like. Let's do some interesting things.
+
+In my output above, i=9997. Yours is probably different, but nevertheless, you should be able to follow along with me. Let's verify the value of i by selecting the stack frame for main() and looking at its value:
+```
+   (gdb) frame 3
+   #3  0x080483eb in main () at beer-process.c:15
+   15                      GoToSleep();
+   (gdb) print i
+   $1 = 99997
+```
+
+No surprises here. As you'd expect, we can use next and step (which takes us out of nanosleep() and sleep() respectively, putting us into GoToSleep()):
+```
+   (gdb) next
+   Single stepping until exit from function nanosleep, 
+   which has no line number information.
+   0x410c6358 in sleep () from /lib/tls/libc.so.6
+   (gdb) step
+   Single stepping until exit from function sleep, 
+   which has no line number information.
+   GoToSleep () at beer-process.c:34
+   34      }
+   (gdb) bt
+   #0  GoToSleep () at beer-process.c:34
+   #1  0x080483eb in main () at beer-process.c:15
+```
+
+Looking at the code, the next things to happen are that i will be decremented and then PrintMessage() will print 99996 bottles of beer on the wall. However, suppose we wanted more beer? Let's change to the stack frame for main() (where i lives) and change the number of beers on the wall.
+```
+   (gdb) frame 3
+   #3  0x080483eb in main () at beer-process.c:15
+   15                      GoToSleep();
+   (gdb) set var i = 99999999
+```
+
+Now quit GDB. When GDB detaches from the process, the process will continue along its merry way. We could also use the detach command to detach from the process without quiting GDB; I'll explain detach in the next session.
+```
+   (gdb) quit
+   The program is running.  Quit anyway (and detach it)? (y or n) y
+   Detaching from program: code/running_process/beer-process,
+   process 17399
+```
+
+but with the new value for i:
+```
+   $ ./beer-process &
+   [1] 17399
+   p@satan$ 100000 bottles of beer on the wall.
+   99999 bottles of beer on the wall.
+   99998 bottles of beer on the wall.
+   99997 bottles of beer on the wall.
+   99999998 bottles of beer on the wall.
+   99999997 bottles of beer on the wall.
+   99999996 bottles of beer on the wall.
+   99999995 bottles of beer on the wall.
+   99999994 bottles of beer on the wall.
+```
+
+I hope you're impressed by this! We attached GDB to a process that was already running. The process halted and we were able to do everything that we would've been able to do had we started the process from within GDB. Now that's power!
+
+One non-debugging use I've had for this in the past is with scientific programming. I had PDE solvers and Monte Carlo applications that would run for a very long time. Whenever I wanted to take a look at how my simulation was doing or what some of the intermediary answers looked like, I'd attach to the process using GDB and inspect my variables. This was a much better option than simply printing everything of interest out, which could've possibly have taken hundreds of megs of disk space!
+
+## With The Attach Command
+We can also debug an already running process using GDB's attach command to attach to a running process. Again, once attached, we can use the detach command to detach from the process.
+
+If you quit the running background process from the previous section, restart beer-process in the background. Start GDB with no command line arguments. But use the attach command to attach to the running process.
+```
+   $ gdb
+   (gdb) attach 17399
+   Attaching to process 17399
+   Reading symbols from code/running_process/beer-process...done.
+   0x410c64fb in nanosleep () from /lib/tls/libc.so.6
+   (gdb) 
+```
+
+As before, the process should halt. This is when you do whatever it is you want to do with the process: debug, snoop, spy, modify, etc. When you're done futzing around, quit GDB:
+```
+   The program is running.  Quit anyway (and detach it)? (y or n) y
+   Detaching from program: code/running_process/beer-process,
+   process 17399
+```
+
+As before, once you detach from the process, it'll continue running.
+
+## Processes Without Debugging Symbols
+As with debugging executables and corefiles, it's only convenient to debug processes that were started from executables with debugging information compiled into them. To see this in action, strip the executable and run it in the background again:
+```
+   $ strip beer-process
+   $ ./beer-process  &
+   [1] 32262
+   p@satan$ 100000 bottles of beer on the wall.
+   99999 bottles of beer on the wall.
+   99998 bottles of beer on the wall.
+```
+
+Debug the process and look at the call stack:
+```
+   $ gdb 
+   (gdb) attach 32262
+   Attaching to process 32262
+   Reading symbols from code/running_process/beer-process...(no debugging symbols found)...done.
+   (gdb) bt
+   #0  0x410c64fb in nanosleep () from /lib/tls/libc.so.6
+   #1  0x410c6358 in sleep () from /lib/tls/libc.so.6
+   #2  0x0804841f in ?? ()
+   #3  0x00000003 in ?? ()
+   #4  0x0001869d in ?? ()
+   #5  0xbffff7b8 in ?? ()
+   #6  0x080483eb in ?? ()
+   #7  0x0001869d in ?? ()
+   #8  0x0001869d in ?? ()
+   #9  0xbffff844 in ?? ()
+   #10 0x4102e7f8 in __libc_start_main () from /lib/tls/libc.so.6
+   #11 0x41150fcc in ?? () from /lib/tls/libc.so.6
+```
+
+#### Exercises
+* Suppose you're playing a game that you have source code for, like Doom, Nethack, or Duke Nukem 3D. How can you use GDB to cheat, like giving yourself extra health? If you wrote your own game, can you protect the integrity of networked games from people who would cheat like this? What kinds of things could you do?
+* Now suppose you're playing a game for which you do *not* have the source code. Can you still cheat in this manner? If so, how would you go about it?
+* Do a Google search on an application called "kcheat". Read the documentation. This person, in effect, wrote a debugger. If you have spare time, download the source and try to learn how it works. Browse the man page for the function ptrace().
+* From the previous exercise, GDB could be considered as a "front end" to ptrace() system call. Look at `ps aux`. Do you see any processes that, if attached to with GDB, would be a security issue? Could cause a system to go down? Cause filesystem corruption? You probably have a process called "init" that has a process id of 1. Try to attach to it. Now become root and try to attach to it. There are some things that even root can't do!
+
 # Chapter 7: Debugging Ncurses Programs
+## Ncurses
+Activities like printing characters to a screen, moving the cursor, and changing the color of character output are collectively known as *screen handling*. By its nature, screen handling is very terminal dependent, however, the terminfo and termcap mechanisms were devised to provide terminal independent screen handling. The [curses](http://en.wikipedia.org/wiki/curses) library (a pun on the term "cursor optimization") was created to provide a screen handling API for C programmers. The goal of curses was to provide a fast, portable, and terminal independent C API to handle device dependent terminal codes.
+
+Curses has a very long and twisted history. However, the most commonly used modern implementation of the library is called *new curses*, or [ncurses](http://en.wikipedia.org/wiki/ncurses), for short. Ncurses is a GNU project released under an MIT style licence and is used under nearly all modern Unixes including GNU/Linux, and Mac OS X. There are now many extensions to ncurses which includes panels, menus and even a full featured widget set: the [Curses Development Kit](http://www.vexus.ca/products/CDK) (CDK).
+
+## Getting Started
+To follow along, download [ncurses1](https://www.dirac.org/linux/gdb/code/07/ncurses1/ncurses1.tar.bz2).
+```c
+1   // ncurses1.c
+2   #include<ncurses.h>
+3   #include<stdlib.h>
+4   #include<time.h>
+5   
+6   unsigned int Seeder(void);
+7   int Irand(int low, int high);
+8   void Print_A_Character(void);
+9   
+10  int main(void)
+11  {
+12       atexit( (void *)endwin );
+13       initscr();
+14       Seeder();
+15  
+16       for (int i = 0; i < 500000; ++i)
+17            Print_A_Character();
+18  
+19       return 0;
+20  }
+21  
+22  
+23  void Print_A_Character(void)
+24  {
+25       int x = Irand(1, COLS);
+26       int y = Irand(1, LINES);
+27       unsigned ascii = Irand('A', 'z');  // ASCII dependent
+28       mvaddch(y, x, ascii);
+29       refresh();
+30  }
+31  
+32  
+33  int Irand(int low, int high)
+34  {  
+35       return low + (int)( (double)(high-low) * rand()/(RAND_MAX + 1.0) );
+36  }
+37  
+38  
+39  unsigned int Seeder(void)
+40  {
+41       time_t seed;
+42       time(&seed);
+43       srand((unsigned)seed);
+44  
+45       return seed;
+46  }
+```
+
+Compile and run the program. It should fill your console (or xterm) with characters. It has a bug though: the top row and first column seem to be devoid of characters. Since the probability of that happening is miniscule (and gets smaller with each passing second), there must be a bug in the program.
+
+You need to do a bit more to use GDB with a program that uses ncurses. The problem is that GDB's I/O is intermixed with the program's I/O. Once you get used to it, this is not normally a problem. But when the program performs screen handling, it becomes difficult, if not impossible, to keep track of your debugging session. To see this in action, start GDB on the executable, set a breakpoint at Print_A_Character(), and run the program.
+```
+   $ gdb debugging_ncurses
+   (gdb) break Print_A_Character 
+   Breakpoint 1 at 0x80486fd: file debugging_ncurses.c, line 26.
+   (gdb) run
+   Starting program: code/ncurses/debugging_ncurses 
+
+   Breakpoint 1, Print_A_Character () at debugging_ncurses.c:26
+   26              int x = Irand(1, COLS);
+```
+
+Now issue `continue 50` a few times. You should see a big mess.
+
+Quit GDB when you've had enough. Clearly, we need a way to separate GDB's I/O from the program's I/O when screen handling is done.
+
+## Separating the Input/Output
+You'll need two terminals (either two consoles or two xterms): One for the program's I/O and another for GDB's I/O. Separating out the two I/O will resolve the problem nicely. I'll be using the word 'xterm', but the same thing applies to all non-login terminals like rxvt and eterm, and login terminals like virtual consoles.
+
+1. Go to the first xterm and find its device file using either `tty` or `who am i`. This will be the xterm with GDB's I/O.:
+```
+       $ tty
+       /dev/pts/1
+       $ who am i
+       p        pts/1        May 26 12:44 (:0.0)
+```
+2. Go to the second xterm and find its device file. This will be the xterm with our program's I/O:
+```
+       $ tty
+       /dev/pts/4
+```
+3. Go back to the first xterm and start a debugging session. Set a breakpoint at Print_A_Character().
+```
+       $ gdb debugging_ncurses
+       (gdb) break Print_A_Character 
+       Breakpoint 1 at 0x80486fd: file debugging_ncurses.c, line 26.
+       (gdb) 
+```
+4. GDB's tty command instructs GDB to redirect the program's I/O to another terminal. The argument to tty is the device file of the terminal you wish the program I/O to go. In this case, I want the program's I/O to go to the second xterm, pts/4. If you're following along, use whatever device file you obtained in step 2:
+```
+       (gdb) tty /dev/pts/4
+       (gdb) 
+```
+5. Lastly, go to the second xterm (that contains the program's I/O) and tell the shell to sleep for a long time. This is so that anything we type in that window will be sure to go to our program rather than the shell. The amount of time is arbitrary, but pick a time that's longer than you suspect the debugging session will last. This tells the shell to "do nothing" for 100000 seconds:
+```
+       $ tty
+       /dev/pts/4
+       $ sleep 100000
+```
+6. Go back to the first xterm which is running GDB and debug to your heart's content. When you're done, you can go back to the program output window and slap it with a control-c to break out of the sleep.
+
+## Debugging Ncurses Example
+Let's go through a sample debugging session of debugging_ncurses.c. The problem was that the first row and column aren't being printed to. At first guess, we might suspect that the random number generator is at fault.
+
+**Under construction**
+
 # Chapter 8: Other Stuff
+## Official Sources
+* The official GNU GDB page is at [sources.redhat.com/gdb](http://sources.redhat.com/gdb). You can download versions of GDB from the current developer's CVS all the way to the version released back in 1988!.
+* There are a number of mailing lists for GDB, including:
+  * **gdb-announce:** a read-only low volume list for the posting of announcements about releases or important events.
+  * **gdb:** a list for general discussion about GDB.
+  * **gdb-patches:** patch submissions and discussion. All patch submissions and submission discussion goes here.
+  * **gdb-prs:** Mailing list for discussing bugs submitted to the bug reporting database.
+  * **gdb-testers:** a list for the announcement of development snapshots and the reporting of test results.
+  * **gdb-cvs:** is where CVS commit messages go when things are checked into the GDB CVS repository.
+  * **src-cvs:** is where CVS commit messages for the top-level files and shared directories go.
+  * **bug-gdb:** bug reports and discussion of bugs in GDB.
+* GNU's official GDB user manual in [html](http://sources.redhat.com/gdb/onlinedocs/gdb_toc.html) and PDF.
+* The [GDB Internals Manual](http://sources.redhat.com/gdb/onlinedocs/gdbint_toc.html).
+
+## Other Tutorials
+* The [official user's manual](http://sources.redhat.com/gdb/current/onlinedocs) in various formats.
+* An excellent [tutorial](http://heather.cs.ucdavis.edu/~matloff/UnixAndC/CLanguage/Debug.html) by Norm Matloff. Highly recommended.
+* A very brief [tutorial](http://www.cs.princeton.edu/~benjasik/gdb/gdbtut.html).
+* A very good [tutorial](http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html), called "RMS's GDB Tutorial". His initials happen to be "RMS". Heh. Very droll!
+* A *very* brief GDB [tutorial](http://galton.uchicago.edu/~gosset/Compdocs/gdb.html).
+* A [tutorial](http://www.cs.usyd.edu.au/~sholden/TEACHING/PP/2000sem2/TUTES/week7/gdb.html) that focuses on C++.
+
+## Kudos
+I've received some great email from around the world. I have a keen interest in other peoples' cultures, their likes, dislikes, what they do, who they are. I'd love to fly to each country and make each one of these people my personal friend. But I can't, so I'll simply post some of the fantastic "kudos" that this page has generated.
+
+If you want your email taken down (or don't want it posted) let me know and I'll be happy to oblige. I'm just grateful to get any email kudos at all. Feel free to send me your homepage, pic, or blog and I'll post them here if you like.
+
+* USA - Abhishek Sharma - 2006 Jun 21 06
+* India - Sri Charan - 2006 Apr 20
+* India - Vihan Pandey - 2006 May 01
+* USA (Santa Clara) - Rayees Shamsuddin - 2005 Aug 29
+* Brazil - Hilton Fernan - 2005 Aug 02
+* Brazil - Fabio Luiz - 2005 Jul 22
+* India - Ram - 2005 Mar 04
+* Canada - Mark Lord - 2005 Jan 21
+
+## Google
+These are some Google rankings of my GDB tutorial. Personally, I think this tutorial is the best on the net. If you want to repay me for writing this tutorial, please consider linking to my tutorial to give me some link-foo with Google. It's easier and cheaper than buying a book! :)
+
+| Search Term | Ranking |
+|:------------|:--------|
+| the best GDB tutorial | 1 |
+| GNU GDB | 2 |
+| best GDB tutorial | 2 |
+| GDB debugger | 3 |
+| GDB tutorial | 6 |
 
 ---
 ##### Original Source: http://web.archive.org/web/20180701022737/http://dirac.org/linux/gdb/
